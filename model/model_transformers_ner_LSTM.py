@@ -41,7 +41,7 @@ class UniRelModel_ner_LSTM(BertPreTrainedModel):
             self.value_linear = nn.Linear(768, 64)
         # print(f"self.config.threshold: {self.config.threshold}")
         self.sigmoid = nn.Sigmoid()
-        self.lstm = nn.LSTM(5, 768, 1, batch_first=True, dropout=config.hidden_dropout_prob)
+        self.lstm = nn.LSTM(5, 64, 1, batch_first=True, dropout=config.hidden_dropout_prob)
     def forward(
         self,
         input_ids=None,
