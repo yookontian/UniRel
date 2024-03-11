@@ -117,22 +117,43 @@ class UniRelDataProcessor(object):
         self.num_labels = self.num_rels
 
     def get_train_sample(self, token_len=100, data_nums=-1):
-        return self._pre_process(self.train_path,
-                                 token_len=token_len,
-                                 is_predict=False,
-                                 data_nums=data_nums)
+        if self.dataset_name == "nyt":
+            return self._pre_process(self.train_path,
+                                     token_len=token_len,
+                                     is_predict=False,
+                                     data_nums=data_nums)
+        elif self.dataset_name == "webnlg":
+            print("using webnlg to preprocessing the train data")
+            return self._pre_process_webnlg(self.train_path,
+                                     token_len=token_len,
+                                     is_predict=False,
+                                     data_nums=data_nums)
 
     def get_dev_sample(self, token_len=150, data_nums=-1):
-        return self._pre_process(self.dev_path,
-                                 token_len=token_len,
-                                 is_predict=True,
-                                 data_nums=data_nums)
+        if self.dataset_name == "nyt":
+            return self._pre_process(self.dev_path,
+                                     token_len=token_len,
+                                     is_predict=True,
+                                     data_nums=data_nums)
+        elif self.dataset_name == "webnlg":
+            print("using webnlg to preprocessing the dev data")
+            return self._pre_process_webnlg(self.dev_path,
+                                     token_len=token_len,
+                                     is_predict=False,
+                                     data_nums=data_nums)
 
     def get_test_sample(self, token_len=150, data_nums=-1):
-        samples = self._pre_process(self.test_path,
-                                    token_len=token_len,
-                                    is_predict=True,
-                                    data_nums=data_nums)
+        if self.dataset_name == "nyt":
+            samples = self._pre_process(self.test_path,
+                                        token_len=token_len,
+                                        is_predict=True,
+                                        data_nums=data_nums)
+        elif self.dataset_name == "webnlg":
+            print("using webnlg to preprocessing the test data")
+            samples = self._pre_process_webnlg(self.test_path,
+                                        token_len=token_len,
+                                        is_predict=True,
+                                        data_nums=data_nums)
         # json.dump(self.complex_data, self.wp, ensure_ascii=False)
         return samples
 
@@ -165,6 +186,186 @@ class UniRelDataProcessor(object):
         # fp.close()
         self.id2label = label_map
         self.label2id = {val: key for key, val in self.id2label.items()}
+
+    def _pre_process_webnlg(self, path, token_len, is_predict, data_nums):
+        # this doesn't tokenized the input_ids, only generate the matrices
+        outputs = {
+            'text': [],
+            "spo_list": [],
+            "spo_span_list": [],
+            "head_label": [],
+            "tail_label": [],
+            "span_label": [],
+            "loc_label": [],
+            "org_label": [],
+            "per_label": [],
+            "country_label": [],
+        }
+        token_len_big_than_100 = 0
+        token_len_big_than_150 = 0
+        max_token_len = 0
+        max_data_nums = math.inf if data_nums == -1 else data_nums
+        data_count = 0
+        data = json.load(open(path))
+        label_dict = {}
+        for line in tqdm(data):
+            if len(line["relation_list"]) == 0:
+                continue
+            text = line["text"]
+            input_ids = self.tokenizer.encode(text)
+            token_encode_len = len(input_ids)
+            if token_encode_len > 100+2:
+                token_len_big_than_100 += 1
+            if token_encode_len > 150+2:
+                token_len_big_than_150 += 1
+            max_token_len = max(max_token_len, token_encode_len)
+            if token_encode_len > token_len + 2:
+                continue
+            spo_list = set()
+            spo_span_list = set()
+            # [CLS] texts [SEP] rels
+            head_matrix = np.zeros([token_len + 2 + self.num_rels,
+                                    token_len + 2 + self.num_rels])
+            tail_matrix = np.zeros(
+                [token_len + 2 + self.num_rels, token_len + 2 + self.num_rels])
+            span_matrix = np.zeros(
+                [token_len + 2 + self.num_rels, token_len + 2 + self.num_rels])
+
+            loc_idx = []
+            org_idx = []
+            per_idx = []
+            country_idx = []
+
+            e2e_set = set()
+            h2r_dict = dict()
+            t2r_dict = dict()
+            spo_tail_set = set()
+            spo_tail_text_set = set()
+            spo_text_set = set()
+            for spo in line["relation_list"]:
+                pred = spo["predicate"]
+                if pred not in label_dict:
+                    label_dict[pred] = 0
+                label_dict[pred] += 1
+                sub = spo["subject"]
+                obj = spo["object"]
+                spo_list.add((sub, pred, obj))
+                # subj_tok_span and obj_tok_span are span's pos in the sentence
+                sub_span = spo["subj_tok_span"]
+                obj_span = spo["obj_tok_span"]
+                pred_idx = self.pred2idx[pred]
+                plus_token_pred_idx = pred_idx + token_len + 2
+                # spo_span_list: {((h_s, h_e), pred_idx, (t_s, t_e)), (), ...}
+                spo_span_list.add((tuple(sub_span), pred_idx, tuple(obj_span)))
+
+                h_s, h_e = sub_span
+                t_s, t_e = obj_span
+                # Entity-Entity Interaction
+                # plus 1 or not is because of the dataset's format
+                # so here the start pos plus 1, the end pos not
+                head_matrix[h_s+1][t_s+1] = 1
+                head_matrix[t_s+1][h_s+1] = 1
+                tail_matrix[h_e][t_e] = 1
+                tail_matrix[t_e][h_e] = 1
+                span_matrix[h_s+1][h_e] = 1
+                span_matrix[h_e][h_s+1] = 1
+                span_matrix[t_s+1][t_e] = 1
+                span_matrix[t_e][t_s+1] = 1
+                # Subject-Relation Interaction
+                head_matrix[h_s+1][plus_token_pred_idx] = 1
+                tail_matrix[h_e][plus_token_pred_idx] = 1
+                span_matrix[h_s+1][plus_token_pred_idx] = 1
+                span_matrix[h_e][plus_token_pred_idx] = 1
+                span_matrix[t_s+1][plus_token_pred_idx] = 1
+                span_matrix[t_e][plus_token_pred_idx] = 1
+                # Relation-Object Interaction
+                head_matrix[plus_token_pred_idx][t_s+1] = 1
+                tail_matrix[plus_token_pred_idx][t_e] = 1
+                span_matrix[plus_token_pred_idx][t_s+1] = 1
+                span_matrix[plus_token_pred_idx][t_e] = 1
+                span_matrix[plus_token_pred_idx][h_s+1] = 1
+                span_matrix[plus_token_pred_idx][h_e] = 1
+                # LOC_head and LOC_tail
+                loc_idx.append([plus_token_pred_idx, t_s+1])
+                loc_idx.append([plus_token_pred_idx, t_e])
+                loc_idx.append([plus_token_pred_idx, h_s+1])
+                loc_idx.append([plus_token_pred_idx, h_e])
+                if spo['subj_ner'] == "LOC":
+                    loc_idx.append([h_s+1, h_s+1])
+                    loc_idx.append([h_e, h_e])
+                if spo['obj_ner'] == "LOC":
+                    loc_idx.append([t_s+1, t_s+1])
+                    loc_idx.append([t_e, t_e])
+                # ORG_head and ORG_tail
+                org_idx.append([plus_token_pred_idx, h_s+1])
+                org_idx.append([plus_token_pred_idx, h_e])
+                org_idx.append([plus_token_pred_idx, t_s+1])
+                org_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "ORG":
+                    org_idx.append([h_s+1, h_s+1])
+                    org_idx.append([h_e, h_e])
+                if spo['obj_ner'] == "ORG":
+                    org_idx.append([t_s+1, t_s+1])
+                    org_idx.append([t_e, t_e])
+                # PER_head and PER_tail
+                per_idx.append([plus_token_pred_idx, h_s+1])
+                per_idx.append([plus_token_pred_idx, h_e])
+                per_idx.append([plus_token_pred_idx, t_s+1])
+                per_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "PER":
+                    per_idx.append([h_s+1, h_s+1])
+                    per_idx.append([h_e, h_e])
+                if spo['obj_ner'] == "PER":
+                    per_idx.append([t_s+1, t_s+1])
+                    per_idx.append([t_e, t_e])
+                # Country_head and Country_tail
+                country_idx.append([plus_token_pred_idx, h_s+1])
+                country_idx.append([plus_token_pred_idx, h_e])
+                country_idx.append([plus_token_pred_idx, t_s+1])
+                country_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "COUNTRY":
+                    country_idx.append([h_s+1, h_s+1])
+                    country_idx.append([h_e, h_e])
+                if spo['obj_ner'] == "COUNTRY":
+                    country_idx.append([t_s+1, t_s+1])
+                    country_idx.append([t_e, t_e])
+
+
+                spo_tail_set.add((h_e, plus_token_pred_idx, t_e))
+                spo_tail_text_set.add((
+                    self.tokenizer.decode(input_ids[h_e]),
+                    pred,
+                    self.tokenizer.decode(input_ids[t_e])
+                ))
+                spo_text_set.add((
+                    self.tokenizer.decode(input_ids[h_s+1:h_e+1]),
+                    pred,
+                    self.tokenizer.decode(input_ids[t_s+1:t_e+1])
+                ))
+                e2e_set.add((h_e, t_e))
+                e2e_set.add((t_e, h_e))
+
+            outputs["text"].append(text)
+            # spo_list: {(sub, pred(original format), obj), (), ...}
+            outputs["spo_list"].append(list(spo_list))
+            # spo_span_list: {((h_s, h_e), pred_idx, (t_s, t_e)), (), ...}
+            outputs["spo_span_list"].append(list(spo_span_list))
+            outputs["head_label"].append(head_matrix)
+            outputs["tail_label"].append(tail_matrix)
+            outputs["span_label"].append(span_matrix)
+            outputs["loc_label"].append(loc_idx)
+            outputs["org_label"].append(org_idx)
+            outputs["per_label"].append(per_idx)
+            outputs["country_label"].append(country_idx)
+
+            data_count += 1
+            if data_count >= max_data_nums:
+                break
+
+        print(max_token_len)
+        print(f"more than 100: {token_len_big_than_100}")
+        print(f"more than 150: {token_len_big_than_150}")
+        return outputs
 
     def _pre_process(self, path, token_len, is_predict, data_nums):
         # this doesn't tokenized the input_ids, only generate the matrices
@@ -354,4 +555,3 @@ class UniRelDataProcessor(object):
         print(f"more than 100: {token_len_big_than_100}")
         print(f"more than 150: {token_len_big_than_150}")
         return outputs
-

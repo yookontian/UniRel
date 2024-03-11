@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 python3 run.py \
-    --task_name UniRel_ner_LSTM \
+    --task_name UniRel_ner \
     --max_seq_length 100 \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 24 \
@@ -13,7 +13,7 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/nyt-ner-LOC-PER-LSTM-bsz8 \
+    --output_dir ./output/webnlg-ner-LOC-ORG-PER-COUNTRY-bsz8 \
     --overwrite_output_dir \
     --dataset_dir ./dataset/ \
     --dataloader_pin_memory \
@@ -21,7 +21,7 @@ python3 run.py \
     --lr_scheduler_type cosine \
     --seed 2023 \
     --do_test_all_checkpoints\
-    --dataset_name nyt \
+    --dataset_name webnlg \
     --test_data_type unirel_span \
     --threshold 0.5 \
     --report_to wandb \

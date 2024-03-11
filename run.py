@@ -26,14 +26,13 @@ from dataprocess.dataset import UniRelDataset, UniRelSpanDataset
 
 from model.model_transformers import  UniRelModel
 from model.model_transformers_ner import UniRelModel_ner
-from model.model_transformers_ner_LSTM import UniRelModel_ner_LSTM
 
 from dataprocess.data_extractor import *
 from dataprocess.data_metric import *
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-UniRelModel = UniRelModel_ner_LSTM
+UniRelModel = UniRelModel_ner
 
 DataProcessorDict = {
     "nyt_all_sa": UniRelDataProcessor,
@@ -295,7 +294,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-ner(LOC,PER)-LSTM-NYT-bsz8)",
+        name="Unirel-ner(LOC,PER,ORG,COUNTRY)-WEBNLG-bsz8)",
     )
 
     # save your trained model checkpoint to wandb
