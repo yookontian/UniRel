@@ -92,10 +92,12 @@ class UniRelModel_ner(BertPreTrainedModel):
                 span_logits = self.sigmoid(
                         attentions_scores[:, 6:8, :, :].mean(1)
                     )
-                loc_logits = self.sigmoid(attentions_scores[:, 8, :, :])
-                org_logits = self.sigmoid(attentions_scores[:, 9, :, :])
-                per_logits = self.sigmoid(attentions_scores[:, 10, :, :])
-                country_logits = self.sigmoid(attentions_scores[:, 11, :, :])
+                loc_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
+                # loc_logits = self.sigmoid(attentions_scores[:, 8, :, :])
+                # org_logits = self.sigmoid(attentions_scores[:, 9, :, :])
+                per_logits = self.sigmoid(attentions_scores[:, 10:, :, :].mean(1))
+                # per_logits = self.sigmoid(attentions_scores[:, 10, :, :])
+                # country_logits = self.sigmoid(attentions_scores[:, 11, :, :])
 
             else:
                 tail_logits = nn.Sigmoid()(

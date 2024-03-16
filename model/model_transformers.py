@@ -49,11 +49,16 @@ class UniRelModel(BertPreTrainedModel):
         head_label=None,
         tail_label=None,
         span_label=None,
+        loc_label=None,
+        org_label=None,
+        per_label=None,
+        country_label=None,
         position_ids=None,
         head_mask=None,
         inputs_embeds=None,
         output_hidden_states=None,
         return_dict=None,
+
     ):
         tail_logits = None
         # For span extraction

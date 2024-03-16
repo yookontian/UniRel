@@ -24,7 +24,7 @@ from transformers import EvalPrediction, set_seed
 from dataprocess.data_processor import UniRelDataProcessor
 from dataprocess.dataset import UniRelDataset, UniRelSpanDataset
 
-from model.model_transformers import  UniRelModel
+from model.model_transformers import UniRelModel
 from model.model_transformers_ner import UniRelModel_ner
 
 from dataprocess.data_extractor import *
@@ -250,7 +250,7 @@ if __name__ == '__main__':
         eval_type="train",
     )
 
-    # 150 is big enough for both NYT and WebNLG testset
+    # # 150 is big enough for both NYT and WebNLG testset
     dev_dataset = DatasetType(
         dev_samples,
         data_processor,
@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-ner(LOC,PER,ORG,COUNTRY)-WEBNLG-bsz8)",
+        name="Unirel-ner(LOC,PER)-Frozen_layer[11]-NYT-bsz8)",
     )
 
     # save your trained model checkpoint to wandb
@@ -311,13 +311,22 @@ if __name__ == '__main__':
             # eval_dataset=dev_dataset,
             compute_metrics=metric_type,
         )
+        print(trainer.model.bert.encoder.layer[11])
+        # print how many trainable parameters are in the model
+        print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+        # frozen all of the trainable parameters in the trainer.model.bert.encoder.layer[11]
+        for param in trainer.model.bert.encoder.layer[11].parameters():
+            param.requires_grad = False
+        print(f"(after frozen) Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+
+
         # print(f"training_args: \n{training_args}")
         train_result = trainer.train()
         trainer.save_model(
             output_dir=f"{trainer.args.output_dir}/checkpoint-final/")
         output_train_file = os.path.join(training_args.output_dir,
                                          "train_results.txt")
-        
+
         # trainer.evaluate()
         #  This method is commonly used in scripts to guard statements
         #  that should only be executed by one process in a distributed
@@ -348,6 +357,7 @@ if __name__ == '__main__':
         best_checkpoint = None
         # Find best model on devset
         for checkpoint in checkpoints:
+            # here it reload the model from the checkpoint
             logger.info(checkpoint)
             print(checkpoint)
             output_dir = os.path.join(training_args.output_dir, checkpoint.split("/")[-1])
@@ -356,29 +366,7 @@ if __name__ == '__main__':
             global_step = checkpoint.split("-")[1]
             prefix = checkpoint.split(
                 "/")[-1] if checkpoint.find("checkpoint") != -1 else ""
-            # here it reload the model from the checkpoint
 
-            """           
-            with torch.no_grad():
-                model = PredictModelType.from_pretrained(checkpoint, config=config)
-                model.eval()
-                trainer = Trainer(model=model,
-                                  args=training_args,
-                                  eval_dataset=dev_dataset,
-                                  callbacks=[MyCallback])
-
-                # eval_res = trainer.evaluate(
-                #     eval_dataset=dev_dataset, metric_key_prefix="test")
-                # result = {f"{k}_{global_step}": v for k, v in eval_res.items()}
-                # results.update(result)
-                dev_predictions = trainer.predict(dev_dataset)
-                p, r, f1 = ExtractType(tokenizer, dev_dataset, dev_predictions, output_dir)
-                if f1 > best_f1:
-                    best_f1 = f1
-                    best_checkpoint = checkpoint
-                # clean the torch cache
-                torch.cuda.empty_cache()
-                """
             # directly using test_dataset to do test
             with torch.no_grad():
                 model = PredictModelType.from_pretrained(checkpoint, config=config)
@@ -404,19 +392,5 @@ if __name__ == '__main__':
 
         # Do test
         logger.info(f"Best checkpoint at {best_checkpoint} \n{{'all-prec': {best_p}, 'all-recall': {best_r}, 'all-f1': {best_f1}}}")
-        """ 
-        logger.info(f"Best checkpoint at {best_checkpoint} with f1 = {best_f1}")
-       
-        model = PredictModelType.from_pretrained(best_checkpoint, config=config)
-        model.eval()
-        trainer = Trainer(model=model,
-                            args=training_args,
-                            # eval_dataset=dev_dataset,
-                            callbacks=[MyCallback])
-
-        test_prediction = trainer.predict(test_dataset)
-        output_dir = os.path.join(training_args.output_dir, best_checkpoint.split("/")[-1])
-        ExtractType(tokenizer, test_dataset, test_prediction, output_dir)
-        """
 
     print("Here I am")
