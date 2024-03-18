@@ -250,7 +250,7 @@ if __name__ == '__main__':
         eval_type="train",
     )
 
-    # # 150 is big enough for both NYT and WebNLG testset
+    # 150 is big enough for both NYT and WebNLG testset
     dev_dataset = DatasetType(
         dev_samples,
         data_processor,
@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-ner(LOC,PER)-Frozen_layer[11]-NYT-bsz8)",
+        name="Unirel-no_ner-NYT-bsz8)",
     )
 
     # save your trained model checkpoint to wandb
@@ -315,9 +315,9 @@ if __name__ == '__main__':
         # print how many trainable parameters are in the model
         print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
         # frozen all of the trainable parameters in the trainer.model.bert.encoder.layer[11]
-        for param in trainer.model.bert.encoder.layer[11].parameters():
-            param.requires_grad = False
-        print(f"(after frozen) Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+        # for param in trainer.model.bert.encoder.layer[11].parameters():
+        #     param.requires_grad = False
+        # print(f"(after frozen) Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
 
 
         # print(f"training_args: \n{training_args}")

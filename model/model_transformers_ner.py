@@ -92,10 +92,10 @@ class UniRelModel_ner(BertPreTrainedModel):
                 span_logits = self.sigmoid(
                         attentions_scores[:, 6:8, :, :].mean(1)
                     )
-                loc_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
+                # loc_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
                 # loc_logits = self.sigmoid(attentions_scores[:, 8, :, :])
                 # org_logits = self.sigmoid(attentions_scores[:, 9, :, :])
-                per_logits = self.sigmoid(attentions_scores[:, 10:, :, :].mean(1))
+                # per_logits = self.sigmoid(attentions_scores[:, 10:, :, :].mean(1))
                 # per_logits = self.sigmoid(attentions_scores[:, 10, :, :])
                 # country_logits = self.sigmoid(attentions_scores[:, 11, :, :])
 
@@ -159,13 +159,13 @@ class UniRelModel_ner(BertPreTrainedModel):
             else:
                 loss += span_loss
 
-        if loc_label is not None and len(loc_label[0]) == len(span_label[0]):
-            loc_loss = nn.BCELoss()(loc_logits.float().reshape(-1),
-                                    loc_label.reshape(-1).float())
-            if loss is None:
-                loss = loc_loss
-            else:
-                loss += loc_loss
+        # if loc_label is not None and len(loc_label[0]) == len(span_label[0]):
+        #     loc_loss = nn.BCELoss()(loc_logits.float().reshape(-1),
+        #                             loc_label.reshape(-1).float())
+        #     if loss is None:
+        #         loss = loc_loss
+        #     else:
+        #         loss += loc_loss
         # if org_label is not None and len(org_label[0]) == len(span_label[0]):
         #     org_loss = nn.BCELoss()(org_logits.float().reshape(-1),
         #                             org_label.reshape(-1).float())
@@ -173,13 +173,13 @@ class UniRelModel_ner(BertPreTrainedModel):
         #         loss = org_loss
         #     else:
         #         loss += org_loss
-        if per_label is not None and len(per_label[0]) == len(span_label[0]):
-            per_loss = nn.BCELoss()(per_logits.float().reshape(-1),
-                                    per_label.reshape(-1).float())
-            if loss is None:
-                loss = per_loss
-            else:
-                loss += per_loss
+        # if per_label is not None and len(per_label[0]) == len(span_label[0]):
+        #     per_loss = nn.BCELoss()(per_logits.float().reshape(-1),
+        #                             per_label.reshape(-1).float())
+        #     if loss is None:
+        #         loss = per_loss
+        #     else:
+        #         loss += per_loss
         # if country_label is not None and len(country_label[0]) == len(span_label[0]):
         #     country_loss = nn.BCELoss()(country_logits.float().reshape(-1),
         #                             country_label.reshape(-1).float())
