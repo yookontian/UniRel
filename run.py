@@ -6,7 +6,7 @@ import csv
 import glob
 from dataclasses import dataclass, field
 from typing import Optional
-from utils import data_collator
+from utils import data_collator, CustomTrainer
 
 import transformers
 import numpy as np
@@ -33,6 +33,7 @@ from dataprocess.data_metric import *
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 UniRelModel = UniRelModel_ner
+Trainer = CustomTrainer
 
 DataProcessorDict = {
     "nyt_all_sa": UniRelDataProcessor,
@@ -294,7 +295,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-no_ner-NYT-bsz8)",
+        name="Unirel-ner(LOC,ORG,PER,COUNTRY)-Frozen_layer[11]_at_Epoch_30-WEBNLG-bsz8",
     )
 
     # save your trained model checkpoint to wandb
@@ -308,12 +309,11 @@ if __name__ == '__main__':
             model=model,
             args=training_args,
             train_dataset=train_dataset,
-            # eval_dataset=dev_dataset,
+            eval_dataset=dev_dataset,
             compute_metrics=metric_type,
         )
-        print(trainer.model.bert.encoder.layer[11])
         # print how many trainable parameters are in the model
-        print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+        # print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
         # frozen all of the trainable parameters in the trainer.model.bert.encoder.layer[11]
         # for param in trainer.model.bert.encoder.layer[11].parameters():
         #     param.requires_grad = False
