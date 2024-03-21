@@ -6,7 +6,7 @@ import csv
 import glob
 from dataclasses import dataclass, field
 from typing import Optional
-from utils import data_collator, CustomTrainer
+from utils import data_collator, CustomTrainer, FreezeLayerCallback
 
 import transformers
 import numpy as np
@@ -33,7 +33,8 @@ from dataprocess.data_metric import *
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 UniRelModel = UniRelModel_ner
-Trainer = CustomTrainer
+# Trainer = CustomTrainer
+freeze_callback = FreezeLayerCallback()
 
 DataProcessorDict = {
     "nyt_all_sa": UniRelDataProcessor,
@@ -311,6 +312,7 @@ if __name__ == '__main__':
             train_dataset=train_dataset,
             eval_dataset=dev_dataset,
             compute_metrics=metric_type,
+            callbacks=[freeze_callback]
         )
         # print how many trainable parameters are in the model
         # print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")

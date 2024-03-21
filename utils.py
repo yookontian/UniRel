@@ -7,11 +7,25 @@ import numpy as np
 import logging
 import unicodedata, re
 
-from transformers import Trainer
+from transformers import Trainer, TrainingArguments, TrainerCallback
+
+class FreezeLayerCallback(TrainerCallback):
+    def __init__(self, freeze_layer_epoch=30, freeze_layer_index=11):
+        print("FreezeLayerCallback init")
+        self.freeze_layer_epoch = freeze_layer_epoch
+        self.freeze_layer_index = freeze_layer_index
+
+    def on_epoch_begin(self, args, state, control, **kwargs):
+        if state.epoch == self.freeze_layer_epoch:
+            # Assuming the model is attached to the trainer and has a BERT encoder
+            model = kwargs['model']
+            for param in model.bert.encoder.layer[self.freeze_layer_index].parameters():
+                param.requires_grad = False
+            print(f"Freezing layer {self.freeze_layer_index} at epoch {self.freeze_layer_epoch}")
 
 
 class CustomTrainer(Trainer):
-    def __init__(self, *args, freeze_layer_epoch=0, freeze_layer_index=11, **kwargs):
+    def __init__(self, *args, freeze_layer_epoch=0.4, freeze_layer_index=11, **kwargs):
         super().__init__(*args, **kwargs)
         print("CustomTrainer init")
         self.freeze_layer_epoch = freeze_layer_epoch
@@ -19,24 +33,38 @@ class CustomTrainer(Trainer):
         self.custom_epoch = 0  # Initialize a custom epoch counter
 
     def train(self, *args, **kwargs):
-        for epoch in range(int(self.args.num_train_epochs)):
-            self.custom_epoch = epoch  # Update custom epoch counter
+        print("CustomTrainer train start")
+        # Assuming you want to use self.state.epoch, but ensure it's properly set or managed
+        if self.freeze_layer_epoch is not None and self.freeze_layer_index is not None:
+            print(f"Epoch {self.state.epoch}: Checking for layer freezing")
 
-            if self.freeze_layer_epoch is not None and self.freeze_layer_index is not None:
-                if self.custom_epoch == self.freeze_layer_epoch:
-                    # Freeze parameters of the specified layer
-                    print(f"(Original) Number of trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
-                    for param in self.model.bert.encoder.layer[self.freeze_layer_index].parameters():
-                        param.requires_grad = False
-                    print(f"Epoch {self.custom_epoch}: Freezing layer {self.freeze_layer_index} parameters")
-                    print(f"(Updated) Number of trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+            # Custom behavior to freeze layers
+            if self.state.epoch and self.state.epoch >= self.freeze_layer_epoch:
+                # Freeze parameters of the specified layer
+                for param in self.model.bert.encoder.layer[self.freeze_layer_index].parameters():
+                    param.requires_grad = False
+                print(f"Epoch {self.state.epoch}: Freezing layer {self.freeze_layer_index} parameters")
 
-            # Call the original train method of Trainer
-            train_output = super().train(*args, **kwargs)
-
-            # If you need to do something after each epoch, do it here
-
-        return train_output
+        return super().train(*args, **kwargs)
+        # for epoch in range(int(self.args.num_train_epochs)):
+        #     self.custom_epoch = epoch  # Update custom epoch counter
+        #     print(f"state: {self.state}")
+        #
+        #     if self.freeze_layer_epoch is not None and self.freeze_layer_index is not None:
+        #         if self.custom_epoch >= self.freeze_layer_epoch:
+        #             # Freeze parameters of the specified layer
+        #             print(f"(Original) Number of trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+        #             for param in self.model.bert.encoder.layer[self.freeze_layer_index].parameters():
+        #                 param.requires_grad = False
+        #             print(f"Epoch {self.custom_epoch}: Freezing layer {self.freeze_layer_index} parameters")
+        #             print(f"(Updated) Number of trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+        #
+        #     # Call the original train method of Trainer
+        #     train_output = super().train(*args, **kwargs)
+        #
+        #     # If you need to do something after each epoch, do it here
+        #
+        # return train_output
 
 
 
