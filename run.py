@@ -32,9 +32,9 @@ from dataprocess.data_metric import *
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-UniRelModel = UniRelModel_ner
+# UniRelModel = UniRelModel_ner
 # Trainer = CustomTrainer
-freeze_callback = FreezeLayerCallback()
+# freeze_callback = FreezeLayerCallback()
 
 DataProcessorDict = {
     "nyt_all_sa": UniRelDataProcessor,
@@ -296,7 +296,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-ner(LOC,ORG,PER,COUNTRY)-Frozen_layer[11]_at_Epoch_30-WEBNLG-bsz8",
+        name="Unirel-WEBNLG-bsz6",
     )
 
     # save your trained model checkpoint to wandb
@@ -310,9 +310,9 @@ if __name__ == '__main__':
             model=model,
             args=training_args,
             train_dataset=train_dataset,
-            eval_dataset=dev_dataset,
+            # eval_dataset=dev_dataset,
             compute_metrics=metric_type,
-            callbacks=[freeze_callback]
+            # callbacks=[freeze_callback]
         )
         # print how many trainable parameters are in the model
         # print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
