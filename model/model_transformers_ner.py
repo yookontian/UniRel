@@ -24,11 +24,10 @@ class UniRelModel_ner(BertPreTrainedModel):
         super(UniRelModel_ner, self).__init__(config=config)
         print("using UniRelModel_ner!")
         self.config = config
-        # if model_dir is not None:
-        #     self.bert = BertModel.from_pretrained(model_dir, config=config)
-        # else:
-        #     self.bert = BertModel(config)
-        self.bert = AutoModel.from_pretrained("SpanBERT/spanbert-base-cased", config=config)
+        if model_dir is not None:
+            self.bert = BertModel.from_pretrained(model_dir, config=config)
+        else:
+            self.bert = BertModel(config)
         
         # Easy debug
         self.tokenizer = BertTokenizerFast.from_pretrained(
