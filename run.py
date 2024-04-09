@@ -33,7 +33,6 @@ from dataprocess.data_metric import *
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # UniRelModel = UniRelModel_ner
-# Trainer = CustomTrainer
 # freeze_callback = FreezeLayerCallback()
 
 DataProcessorDict = {
@@ -227,8 +226,8 @@ if __name__ == '__main__':
     train_samples = data_processor.get_train_sample(
          token_len=run_args.max_seq_length, data_nums=run_args.train_data_nums)
 
-    dev_samples = data_processor.get_dev_sample(
-        token_len=150, data_nums=run_args.test_data_nums)
+    # dev_samples = data_processor.get_dev_sample(
+    #     token_len=150, data_nums=run_args.test_data_nums)
 
     # For special experiment wants to test on specific testset
     if run_args.test_data_path is not None:
@@ -253,18 +252,18 @@ if __name__ == '__main__':
     )
 
     # 150 is big enough for both NYT and WebNLG testset
-    dev_dataset = DatasetType(
-        dev_samples,
-        data_processor,
-        tokenizer,
-        mode='dev',
-        ignore_label=-100,
-        model_type='bert',
-        ngram_dict=None,
-        max_length=150 + 2,
-        predict=True,
-        eval_type="eval"
-    )
+    # dev_dataset = DatasetType(
+    #     dev_samples,
+    #     data_processor,
+    #     tokenizer,
+    #     mode='dev',
+    #     ignore_label=-100,
+    #     model_type='bert',
+    #     ngram_dict=None,
+    #     max_length=150 + 2,
+    #     predict=True,
+    #     eval_type="eval"
+    # )
     test_dataset = DatasetType(
         test_samples,
         data_processor,
@@ -296,7 +295,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-WEBNLG-bsz6",
+        name="Unirel-spanbert-Train_Valid_data-WEBNLG-bsz6",
     )
 
     # save your trained model checkpoint to wandb

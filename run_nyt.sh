@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=0
 python3 run.py \
     --task_name UniRel_ner \
     --max_seq_length 100 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 24 \
     --per_device_eval_batch_size 24 \
     --learning_rate 3e-5 \
     --num_train_epochs 100 \
@@ -13,7 +13,7 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/nyt-ner-LOC-ORG-PER-COUNTRY-FROZEN_LAYER_11_AT_EPOCH_30-bsz8 \
+    --output_dir ./output/nyt-no_ner-t_v_data-bsz24 \
     --overwrite_output_dir \
     --dataset_dir ./dataset/ \
     --dataloader_pin_memory \

@@ -4,7 +4,7 @@ from typing import Optional
 from torch import nn
 
 from transformers import (PreTrainedModel, BertPreTrainedModel, BertConfig,
-                          BertTokenizerFast)
+                          BertTokenizerFast, AutoModel)
 from transformers.file_utils import ModelOutput
 from transformers.models.bert.modeling_bert import BertOnlyMLMHead, BertOnlyNSPHead, BertForMaskedLM, BertLMHeadModel
 from .modify_bert import BertModel
@@ -23,10 +23,14 @@ class UniRelModel(BertPreTrainedModel):
     def __init__(self, config, model_dir=None):
         super(UniRelModel, self).__init__(config=config)
         self.config = config
-        if model_dir is not None:
-            self.bert = BertModel.from_pretrained(model_dir, config=config)
-        else:
-            self.bert = BertModel(config)
+        # if model_dir is not None:
+        #     self.bert = BertModel.from_pretrained(model_dir, config=config)
+        # else:
+        #     self.bert = BertModel(config)
+        print("the config:")
+        print(config)
+        self.bert = AutoModel.from_pretrained("SpanBERT/spanbert-base-cased", config=config)
+        print("using spanbert")
         
         # Easy debug
         self.tokenizer = BertTokenizerFast.from_pretrained(
