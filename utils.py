@@ -10,8 +10,9 @@ import unicodedata, re
 from transformers import Trainer, TrainingArguments, TrainerCallback
 
 class FreezeLayerCallback(TrainerCallback):
-    def __init__(self, freeze_layer_epoch=30, freeze_layer_index=11):
+    def __init__(self, freeze_layer_epoch=50, freeze_layer_index=11):
         print("FreezeLayerCallback init")
+        print(f"The layer {freeze_layer_index} will be frozen at epoch {freeze_layer_epoch}.")
         self.freeze_layer_epoch = freeze_layer_epoch
         self.freeze_layer_index = freeze_layer_index
 

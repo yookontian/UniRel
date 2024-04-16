@@ -42,7 +42,7 @@ DataProcessorDict = {
 
 DatasetDict = {
     "nyt_all_sa": UniRelDataset,
-    "unirel_span": UniRelSpanDataset 
+    "unirel_span": UniRelSpanDataset
 }
 
 ModelDict = {
@@ -292,54 +292,6 @@ if __name__ == '__main__':
 
     # set the wandb project where this run will be logged
     # start a new wandb run to track this script
-
-    wandb.init(
-        project="Unirel",
-        name="Unirel-ner(LOC,ORG,PER,COUNTRY)-NYT-bsz24-try2",
-    )
-
-    # save your trained model checkpoint to wandb
-    os.environ["WANDB_LOG_MODEL"] = "true"
-
-    # turn off watch to log faster
-    os.environ["WANDB_WATCH"] = "false"
-
-    if training_args.do_train:
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_dataset,
-            # eval_dataset=dev_dataset,
-            compute_metrics=metric_type,
-            # callbacks=[freeze_callback]
-        )
-        # print how many trainable parameters are in the model
-        # print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
-        # frozen all of the trainable parameters in the trainer.model.bert.encoder.layer[11]
-        # for param in trainer.model.bert.encoder.layer[11].parameters():
-        #     param.requires_grad = False
-        # print(f"(after frozen) Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
-
-
-        # print(f"training_args: \n{training_args}")
-        train_result = trainer.train()
-        trainer.save_model(
-            output_dir=f"{trainer.args.output_dir}/checkpoint-final/")
-        output_train_file = os.path.join(training_args.output_dir,
-                                         "train_results.txt")
-
-        # trainer.evaluate()
-        #  This method is commonly used in scripts to guard statements
-        #  that should only be executed by one process in a distributed
-        #  training setup. For example, saving a model checkpoint or
-        #  writing logs to a file should ideally be done by only one
-        #  process to prevent overwrites or unnecessary duplication.
-        if trainer.is_world_process_zero():
-            with open(output_train_file, "w") as writer:
-                logger.info("***** Train Results *****")
-                for key, value in sorted(train_result.metrics.items()):
-                    logger.info(f"  {key} = {value}")
-                    print(f"{key} = {value}", file=writer)
 
     results = dict()
     if run_args.do_test_all_checkpoints:

@@ -3,7 +3,7 @@ python3 run.py \
     --task_name UniRel_ner \
     --max_seq_length 100 \
     --per_device_train_batch_size 6 \
-    --per_device_eval_batch_size 9 \
+    --per_device_eval_batch_size 24 \
     --learning_rate 5e-5 \
     --num_train_epochs 100 \
     --logging_dir ./tb_logs \
@@ -13,7 +13,7 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/webnlg-spanbert-t_v_data-bsz6 \
+    --output_dir ./output/webnlg-ner-LOC-ORG-PER-COUNTRY-FROZEN_LAYER_11_AT_EPOCH_50-t_v_data-bsz6 \
     --overwrite_output_dir \
     --dataset_dir ./dataset/ \
     --dataloader_pin_memory \

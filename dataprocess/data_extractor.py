@@ -255,6 +255,26 @@ def unirel_span_extractor(tokenizer,
     # NOTE: This is only for test!
     # head_preds, tail_preds, span_preds = predictions.label_ids
     curr_data_idx = 0
+
+    # Normal
+    state_dict_normal = {"p": 0, "c": 0, "g": 0}
+    # SEO
+    state_dict_seo = {"p": 0, "c": 0, "g": 0}
+    # EPO
+    state_dict_epo = {"p": 0, "c": 0, "g": 0}
+    # SOO
+    state_dict_soo = {"p": 0, "c": 0, "g": 0}
+    # = 1
+    state_dict_1 = {"p": 0, "c": 0, "g": 0}
+    # = 2
+    state_dict_2 = {"p": 0, "c": 0, "g": 0}
+    # = 3
+    state_dict_3 = {"p": 0, "c": 0, "g": 0}
+    # = 4
+    state_dict_4 = {"p": 0, "c": 0, "g": 0}
+    # >= 5
+    state_dict_5 = {"p": 0, "c": 0, "g": 0}
+
     # for tail_pred, tail_label in zip(tail_preds, tail_labels):
     for head_pred, tail_pred, span_pred in zip(head_preds, tail_preds, span_preds):
         input_ids = dataset[curr_data_idx]["input_ids"]
@@ -262,12 +282,44 @@ def unirel_span_extractor(tokenizer,
         spo_list = dataset.spo_lists[curr_data_idx]
         spo_span_list = dataset.spo_span_lists[curr_data_idx]
         gold_spo_text = set()
-        # Extract golden triples with same tokenizer 
+        # Extract golden triples with same tokenizer
+        normal = True
+        seo = False
+        epo = False
+        soo = False
+        occured_en = []
+        occured_pair = []
         for spo in spo_span_list:
             rel_str = dataset.data_processor.idx2pred[spo[1]]
             left_str = tokenizer.decode(input_ids[spo[0][0]+1:spo[0][1]+1])
             right_str = tokenizer.decode(input_ids[spo[2][0]+1:spo[2][1]+1])
             gold_spo_text.add((left_str, rel_str, right_str))
+            # SEO
+            if spo[0] in occured_en or spo[2] in occured_en:
+                normal = False
+                # EPO start
+                if ((spo[0], spo[2]) in occured_pair) or ((spo[2], spo[0]) in occured_pair):
+                    epo = True
+                else:
+                    occured_pair.append((spo[0], spo[2]))
+                # EPO end
+                    seo = True
+
+            else:
+                if spo[0] not in occured_en:
+                    occured_en.append(spo[0])
+                if spo[2] not in occured_en:
+                    occured_en.append(spo[2])
+            # SOO
+            # spo[0] includes spo[2]
+            if spo[0][0] <= spo[2][0] and spo[0][1] >= spo[2][1]:
+                soo = True
+                normal = False
+            # spo[2] includes spo[0]
+            if spo[2][0] <= spo[0][0] and spo[2][1] >= spo[0][1]:
+                soo = True
+                normal = False
+
         
         curr_data_idx += 1
 
@@ -305,6 +357,44 @@ def unirel_span_extractor(tokenizer,
         state_dict["p"] += len(pred_spo_text)
         state_dict["g"] += len(gold_spo_text)
         state_dict["c"] += len(pred_spo_text & gold_spo_text)
+        if len(spo_span_list) == 1:
+            state_dict_1["p"] += len(pred_spo_text)
+            state_dict_1["g"] += len(gold_spo_text)
+            state_dict_1["c"] += len(pred_spo_text & gold_spo_text)
+        elif len(spo_span_list) == 2:
+            state_dict_2["p"] += len(pred_spo_text)
+            state_dict_2["g"] += len(gold_spo_text)
+            state_dict_2["c"] += len(pred_spo_text & gold_spo_text)
+        elif len(spo_span_list) == 3:
+            state_dict_3["p"] += len(pred_spo_text)
+            state_dict_3["g"] += len(gold_spo_text)
+            state_dict_3["c"] += len(pred_spo_text & gold_spo_text)
+        elif len(spo_span_list) == 4:
+            state_dict_4["p"] += len(pred_spo_text)
+            state_dict_4["g"] += len(gold_spo_text)
+            state_dict_4["c"] += len(pred_spo_text & gold_spo_text)
+        else:
+            state_dict_5["p"] += len(pred_spo_text)
+            state_dict_5["g"] += len(gold_spo_text)
+            state_dict_5["c"] += len(pred_spo_text & gold_spo_text)
+
+        if normal:
+            state_dict_normal["p"] += len(pred_spo_text)
+            state_dict_normal["g"] += len(gold_spo_text)
+            state_dict_normal["c"] += len(pred_spo_text & gold_spo_text)
+        if seo:
+            state_dict_seo["p"] += len(pred_spo_text)
+            state_dict_seo["g"] += len(gold_spo_text)
+            state_dict_seo["c"] += len(pred_spo_text & gold_spo_text)
+        if epo:
+            state_dict_epo["p"] += len(pred_spo_text)
+            state_dict_epo["g"] += len(gold_spo_text)
+            state_dict_epo["c"] += len(pred_spo_text & gold_spo_text)
+        if soo:
+            state_dict_soo["p"] += len(pred_spo_text)
+            state_dict_soo["g"] += len(gold_spo_text)
+            state_dict_soo["c"] += len(pred_spo_text & gold_spo_text)
+
         # if len(pred_spo_text & gold_spo_text) != len(gold_spo_text):
         #     print("problem")
 
@@ -317,7 +407,25 @@ def unirel_span_extractor(tokenizer,
         })
     # print(calclulate_f1(state_dict))
     all_metirc_results = calclulate_f1(state_dict, 'all')
+    l1_metirc_results = calclulate_f1(state_dict_1, '1')
+    l2_metirc_results = calclulate_f1(state_dict_2, '2')
+    l3_metirc_results = calclulate_f1(state_dict_3, '3')
+    l4_metirc_results = calclulate_f1(state_dict_4, '4')
+    l5_metirc_results = calclulate_f1(state_dict_5, '5')
+    normal_metirc_results = calclulate_f1(state_dict_normal, 'normal')
+    seo_metirc_results = calclulate_f1(state_dict_seo, 'seo')
+    epo_metirc_results = calclulate_f1(state_dict_epo, 'epo')
+    soo_metirc_results = calclulate_f1(state_dict_soo, 'soo')
     print(f"\nall:  {state_dict} \n {calclulate_f1(state_dict, 'all')}")
+    print(f"\n1:  {state_dict_1} \n {calclulate_f1(state_dict_1, '1')}")
+    print(f"\n2:  {state_dict_2} \n {calclulate_f1(state_dict_2, '2')}")
+    print(f"\n3:  {state_dict_3} \n {calclulate_f1(state_dict_3, '3')}")
+    print(f"\n4:  {state_dict_4} \n {calclulate_f1(state_dict_4, '4')}")
+    print(f"\n5:  {state_dict_5} \n {calclulate_f1(state_dict_5, '5')}")
+    print(f"\nnormal:  {state_dict_normal} \n {calclulate_f1(state_dict_normal, 'normal')}")
+    print(f"\nseo:  {state_dict_seo} \n {calclulate_f1(state_dict_seo, 'seo')}")
+    print(f"\nepo:  {state_dict_epo} \n {calclulate_f1(state_dict_epo, 'epo')}")
+    print(f"\nsoo:  {state_dict_soo} \n {calclulate_f1(state_dict_soo, 'soo')}")
     with open(path, "w") as wp:
         json.dump(extract_data, wp, indent=2, ensure_ascii=False)
     return all_metirc_results["all-prec"], all_metirc_results["all-recall"], all_metirc_results["all-f1"]
