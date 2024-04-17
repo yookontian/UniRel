@@ -287,13 +287,13 @@ class UniRelDataProcessor(object):
                 span_matrix[plus_token_pred_idx][h_e] = 1
                 # LOC_head and LOC_tail
                 loc_idx.append([plus_token_pred_idx, t_s+1])
-                loc_idx.append([t_s+1][plus_token_pred_idx])
+                loc_idx.append([t_s+1, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([t_e][plus_token_pred_idx])
+                loc_idx.append([t_e, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, h_s+1])
-                loc_idx.append([h_s+1][plus_token_pred_idx])
+                loc_idx.append([h_s+1, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, h_e])
-                loc_idx.append([h_e][plus_token_pred_idx])
+                loc_idx.append([h_e, plus_token_pred_idx])
                 if spo['subj_ner'] == "LOC":
                     loc_idx.append([h_s+1, h_s+1])
                     loc_idx.append([h_e, h_e])
@@ -499,13 +499,13 @@ class UniRelDataProcessor(object):
                 span_matrix[plus_token_pred_idx][h_e] = 1
                 # LOC_head and LOC_tail
                 loc_idx.append([plus_token_pred_idx, t_s+1])
-                loc_idx.append([t_s+1][plus_token_pred_idx])
+                loc_idx.append([t_s+1, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([t_e][plus_token_pred_idx])
+                loc_idx.append([t_e, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, h_s+1])
-                loc_idx.append([h_s+1][plus_token_pred_idx])
+                loc_idx.append([h_s+1, plus_token_pred_idx])
                 loc_idx.append([plus_token_pred_idx, h_e])
-                loc_idx.append([h_e][plus_token_pred_idx])
+                loc_idx.append([h_e, plus_token_pred_idx])
                 if pred_idx in loc_head:
                     loc_idx.append([h_s+1, h_s+1])
                     loc_idx.append([h_e, h_e])
