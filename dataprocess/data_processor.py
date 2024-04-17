@@ -388,6 +388,13 @@ class UniRelDataProcessor(object):
         data_count = 0
         data = json.load(open(path))
         label_dict = {}
+        # statistic
+        num_lines = len(data)
+        loc_count = 0
+        per_count = 0
+        org_count = 0
+        country_count = 0
+
         for line in tqdm(data):
             if len(line["relation_list"]) == 0:
                 continue
@@ -482,9 +489,11 @@ class UniRelDataProcessor(object):
                 if pred_idx in loc_head:
                     loc_idx.append([h_s+1, h_s+1])
                     loc_idx.append([h_e, h_e])
+                    loc_count += 1
                 if pred_idx in loc_tail:
                     loc_idx.append([t_s+1, t_s+1])
                     loc_idx.append([t_e, t_e])
+                    loc_count += 1
                 # ORG_head and ORG_tail
                 org_idx.append([plus_token_pred_idx, h_s+1])
                 org_idx.append([plus_token_pred_idx, h_e])
@@ -493,9 +502,11 @@ class UniRelDataProcessor(object):
                 if pred_idx in org_head:
                     org_idx.append([h_s+1, h_s+1])
                     org_idx.append([h_e, h_e])
+                    org_count += 1
                 if pred_idx in org_tail:
                     org_idx.append([t_s+1, t_s+1])
                     org_idx.append([t_e, t_e])
+                    org_count += 1
                 # PER_head and PER_tail
                 per_idx.append([plus_token_pred_idx, h_s+1])
                 per_idx.append([plus_token_pred_idx, h_e])
@@ -504,9 +515,11 @@ class UniRelDataProcessor(object):
                 if pred_idx in per_head:
                     per_idx.append([h_s+1, h_s+1])
                     per_idx.append([h_e, h_e])
+                    per_count += 1
                 if pred_idx in per_tail:
                     per_idx.append([t_s+1, t_s+1])
                     per_idx.append([t_e, t_e])
+                    per_count += 1
                 # Country_head and Country_tail
                 country_idx.append([plus_token_pred_idx, h_s+1])
                 country_idx.append([plus_token_pred_idx, h_e])
@@ -515,9 +528,11 @@ class UniRelDataProcessor(object):
                 if pred_idx in country_head:
                     country_idx.append([h_s+1, h_s+1])
                     country_idx.append([h_e, h_e])
+                    country_count += 1
                 if pred_idx in country_tail:
                     country_idx.append([t_s+1, t_s+1])
                     country_idx.append([t_e, t_e])
+                    country_count += 1
 
 
                 spo_tail_set.add((h_e, plus_token_pred_idx, t_e))
@@ -533,6 +548,8 @@ class UniRelDataProcessor(object):
                 ))
                 e2e_set.add((h_e, t_e))
                 e2e_set.add((t_e, h_e))
+
+
 
             outputs["text"].append(text)
             # spo_list: {(sub, pred(original format), obj), (), ...}
@@ -551,7 +568,14 @@ class UniRelDataProcessor(object):
             if data_count >= max_data_nums:
                 break
 
-        print(max_token_len)
+        # print the statistics
+        print(f"Total samples: {num_lines}")
+        print(f"LOC count: {loc_count/2}")
+        print(f"PER count: {per_count/2}")
+        print(f"ORG count: {org_count/2}")
+        print(f"COUNTRY count: {country_count/2}")
+
+        print(f"max token: {max_token_len}")
         print(f"more than 100: {token_len_big_than_100}")
         print(f"more than 150: {token_len_big_than_150}")
         return outputs
