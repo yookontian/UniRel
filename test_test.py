@@ -6,7 +6,7 @@ import csv
 import glob
 from dataclasses import dataclass, field
 from typing import Optional
-from utils import data_collator, CustomTrainer, FreezeLayerCallback
+from utils import data_collator, FreezeLayerCallback
 
 import transformers
 import numpy as np

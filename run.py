@@ -6,7 +6,7 @@ import csv
 import glob
 from dataclasses import dataclass, field
 from typing import Optional
-from utils import data_collator, CustomTrainer, FreezeLayerCallback
+from utils import data_collator, FreezeLayerCallback
 
 import transformers
 import numpy as np
@@ -292,7 +292,7 @@ if __name__ == '__main__':
 
     # set the wandb project where this run will be logged
     # start a new wandb run to track this script
-
+    """
     wandb.init(
         project="Unirel",
         name="Unirel-ner(LOC,ORG,PER,COUNTRY)-NYT-bsz24-try2",
@@ -303,6 +303,7 @@ if __name__ == '__main__':
 
     # turn off watch to log faster
     os.environ["WANDB_WATCH"] = "false"
+    """
 
     if training_args.do_train:
         trainer = Trainer(
