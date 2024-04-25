@@ -32,7 +32,7 @@ from dataprocess.data_metric import *
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-UniRelModel = UniRelModel_ner
+# UniRelModel = UniRelModel_ner
 # freeze_callback = FreezeLayerCallback()
 
 DataProcessorDict = {
@@ -292,10 +292,10 @@ if __name__ == '__main__':
 
     # set the wandb project where this run will be logged
     # start a new wandb run to track this script
-    """
+
     wandb.init(
         project="Unirel",
-        name="Unirel-ner(LOC,ORG,PER,COUNTRY)-NYT-bsz24-try2",
+        name="Unirel-sem_eval_2010_task_8-bsz6",
     )
 
     # save your trained model checkpoint to wandb
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 
     # turn off watch to log faster
     os.environ["WANDB_WATCH"] = "false"
-    """
+
 
     if training_args.do_train:
         trainer = Trainer(

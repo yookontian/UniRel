@@ -13,15 +13,15 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/webnlg-ner-LOC-ORG-PER-COUNTRY-t_v_data-bsz6-try2 \
+    --output_dir ./output/sem_2010-bsz6 \
     --overwrite_output_dir \
-    --dataset_dir ./dataset/ \
+    --dataset_dir /home/tian/Projects/UniRel/dataset/ \
     --dataloader_pin_memory \
     --dataloader_num_workers 4 \
     --lr_scheduler_type cosine \
     --seed 2023 \
     --do_test_all_checkpoints\
-    --dataset_name webnlg \
+    --dataset_name sem_eval_2010_task_8 \
     --test_data_type unirel_span \
     --threshold 0.5 \
     --report_to wandb \

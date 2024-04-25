@@ -13,9 +13,9 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/nyt-ner-LOC-ORG-PER-COUNTRY-bsz24-try2 \
+    --output_dir ./output/nyt \
     --overwrite_output_dir \
-    --dataset_dir ./dataset/nyt/original \
+    --dataset_dir ./dataset/ \
     --dataloader_pin_memory \
     --dataloader_num_workers 4 \
     --lr_scheduler_type cosine \

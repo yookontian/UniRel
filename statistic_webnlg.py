@@ -1,7 +1,7 @@
 import json
 
 # Path to the JSON file
-file_path = 'dataset/webnlg/train_split.json'
+file_path = 'dataset/CoNLL04/train_split.json'
 
 # Load the JSON data
 with open(file_path, 'r', encoding='utf-8') as file:

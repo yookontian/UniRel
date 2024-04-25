@@ -79,6 +79,44 @@ class UniRelDataProcessor(object):
                     print("exist", k, "  ", v)
                 else:
                     exist_value.append(v)
+        elif dataset_name == "sem_eval_2010_task_8":
+            # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
+            self.pred2text=dataprocess.rel2text.sem_eval_rel2text
+            cnt = 1
+            exist_value=[]
+            # Some hard to convert relation directly use [unused]
+            for k in self.pred2text:
+                v = self.pred2text[k]
+                if isinstance(v, int):
+                    self.pred2text[k] = f"[unused{cnt}]"
+                    cnt += 1
+                    continue
+                ids = self.tokenizer(v)
+                if len(ids["input_ids"]) != 3:
+                    print(k, "   ", v)
+                if v in exist_value:
+                    print("exist", k, "  ", v)
+                else:
+                    exist_value.append(v)
+        elif dataset_name == "CoNLL04":
+            # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
+            self.pred2text=dataprocess.rel2text.CoNLL04_rel2text
+            cnt = 1
+            exist_value=[]
+            # Some hard to convert relation directly use [unused]
+            for k in self.pred2text:
+                v = self.pred2text[k]
+                if isinstance(v, int):
+                    self.pred2text[k] = f"[unused{cnt}]"
+                    cnt += 1
+                    continue
+                ids = self.tokenizer(v)
+                if len(ids["input_ids"]) != 3:
+                    print(k, "   ", v)
+                if v in exist_value:
+                    print("exist", k, "  ", v)
+                else:
+                    exist_value.append(v)
         elif dataset_name == "webnlg_star":
             self.pred2text={}
             for pred in self.label2id.keys():
@@ -122,8 +160,12 @@ class UniRelDataProcessor(object):
                                      token_len=token_len,
                                      is_predict=False,
                                      data_nums=data_nums)
-        elif self.dataset_name == "webnlg":
+        elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the train data")
+            if self.dataset_name == "sem_eval_2010_task_8":
+                print("sem_eval_2010_task_8 dataset")
+            if self.dataset_name == "CoNLL04":
+                print("CoNLL04 dataset")
             return self._pre_process_webnlg(self.train_path,
                                      token_len=token_len,
                                      is_predict=False,
@@ -135,8 +177,12 @@ class UniRelDataProcessor(object):
                                      token_len=token_len,
                                      is_predict=True,
                                      data_nums=data_nums)
-        elif self.dataset_name == "webnlg":
+        elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the dev data")
+            if self.dataset_name == "sem_eval_2010_task_8":
+                print("sem_eval_2010_task_8 dataset")
+            if self.dataset_name == "CoNLL04":
+                print("CoNLL04 dataset")
             return self._pre_process_webnlg(self.dev_path,
                                      token_len=token_len,
                                      is_predict=False,
@@ -148,8 +194,12 @@ class UniRelDataProcessor(object):
                                         token_len=token_len,
                                         is_predict=True,
                                         data_nums=data_nums)
-        elif self.dataset_name == "webnlg":
+        elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the test data")
+            if self.dataset_name == "sem_eval_2010_task_8":
+                print("sem_eval_2010_task_8 dataset")
+            if self.dataset_name == "CoNLL04":
+                print("CoNLL04 dataset")
             samples = self._pre_process_webnlg(self.test_path,
                                         token_len=token_len,
                                         is_predict=True,
@@ -286,14 +336,15 @@ class UniRelDataProcessor(object):
                 span_matrix[plus_token_pred_idx][h_s+1] = 1
                 span_matrix[plus_token_pred_idx][h_e] = 1
                 # LOC_head and LOC_tail
-                # loc_idx.append([plus_token_pred_idx, t_s+1])
-                loc_idx.append([t_s+1, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([t_e, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, h_s+1])
-                loc_idx.append([h_s+1, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, h_e])
-                loc_idx.append([h_e, plus_token_pred_idx])
+                loc_idx.append([plus_token_pred_idx, t_s+1])
+                loc_idx.append([plus_token_pred_idx, t_e])
+                loc_idx.append([plus_token_pred_idx, h_s + 1])
+                loc_idx.append([plus_token_pred_idx, h_e])
+
+                # loc_idx.append([t_s+1, plus_token_pred_idx])
+                # loc_idx.append([t_e, plus_token_pred_idx])
+                # loc_idx.append([h_s+1, plus_token_pred_idx])
+                # loc_idx.append([h_e, plus_token_pred_idx])
                 if spo['subj_ner'] == "LOC":
                     loc_idx.append([h_s+1, h_s+1])
                     loc_idx.append([h_e, h_e])
@@ -301,14 +352,15 @@ class UniRelDataProcessor(object):
                     loc_idx.append([t_s+1, t_s+1])
                     loc_idx.append([t_e, t_e])
                 # ORG_head and ORG_tail
-                # org_idx.append([plus_token_pred_idx, h_s+1])
-                org_idx.append([h_s+1, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, h_e])
-                org_idx.append([h_e, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, t_s+1])
-                org_idx.append([t_s+1, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, t_e])
-                org_idx.append([t_e, plus_token_pred_idx])
+                org_idx.append([plus_token_pred_idx, h_s+1])
+                org_idx.append([plus_token_pred_idx, h_e])
+                org_idx.append([plus_token_pred_idx, t_s + 1])
+                org_idx.append([plus_token_pred_idx, t_e])
+
+                # org_idx.append([h_s+1, plus_token_pred_idx])
+                # org_idx.append([h_e, plus_token_pred_idx])
+                # org_idx.append([t_s+1, plus_token_pred_idx])
+                # org_idx.append([t_e, plus_token_pred_idx])
                 if spo['subj_ner'] == "ORG":
                     org_idx.append([h_s+1, h_s+1])
                     org_idx.append([h_e, h_e])
@@ -316,14 +368,15 @@ class UniRelDataProcessor(object):
                     org_idx.append([t_s+1, t_s+1])
                     org_idx.append([t_e, t_e])
                 # PER_head and PER_tail
-                # per_idx.append([plus_token_pred_idx, h_s + 1])
-                per_idx.append([h_s + 1, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, h_e])
-                per_idx.append([h_e, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, t_s + 1])
-                per_idx.append([t_s + 1, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, t_e])
-                per_idx.append([t_e, plus_token_pred_idx])
+                per_idx.append([plus_token_pred_idx, h_s + 1])
+                per_idx.append([plus_token_pred_idx, h_e])
+                per_idx.append([plus_token_pred_idx, t_s + 1])
+                per_idx.append([plus_token_pred_idx, t_e])
+
+                # per_idx.append([h_s + 1, plus_token_pred_idx])
+                # per_idx.append([h_e, plus_token_pred_idx])
+                # per_idx.append([t_s + 1, plus_token_pred_idx])
+                # per_idx.append([t_e, plus_token_pred_idx])
                 if spo['subj_ner'] == "PER":
                     per_idx.append([h_s+1, h_s+1])
                     per_idx.append([h_e, h_e])
@@ -331,14 +384,15 @@ class UniRelDataProcessor(object):
                     per_idx.append([t_s+1, t_s+1])
                     per_idx.append([t_e, t_e])
                 # Country_head and Country_tail
-                # country_idx.append([plus_token_pred_idx, h_s+1])
-                country_idx.append([h_s+1, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, h_e])
-                country_idx.append([h_e, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, t_s+1])
-                country_idx.append([t_s+1, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, t_e])
-                country_idx.append([t_e, plus_token_pred_idx])
+                country_idx.append([plus_token_pred_idx, h_s+1])
+                country_idx.append([plus_token_pred_idx, h_e])
+                country_idx.append([plus_token_pred_idx, t_s + 1])
+                country_idx.append([plus_token_pred_idx, t_e])
+
+                # country_idx.append([h_s+1, plus_token_pred_idx])
+                # country_idx.append([h_e, plus_token_pred_idx])
+                # country_idx.append([t_s+1, plus_token_pred_idx])
+                # country_idx.append([t_e, plus_token_pred_idx])
                 if spo['subj_ner'] == "COUNTRY":
                     country_idx.append([h_s+1, h_s+1])
                     country_idx.append([h_e, h_e])
@@ -498,14 +552,15 @@ class UniRelDataProcessor(object):
                 span_matrix[plus_token_pred_idx][h_s+1] = 1
                 span_matrix[plus_token_pred_idx][h_e] = 1
                 # LOC_head and LOC_tail
-                # loc_idx.append([plus_token_pred_idx, t_s+1])
-                loc_idx.append([t_s+1, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([t_e, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, h_s+1])
-                loc_idx.append([h_s+1, plus_token_pred_idx])
-                # loc_idx.append([plus_token_pred_idx, h_e])
-                loc_idx.append([h_e, plus_token_pred_idx])
+                loc_idx.append([plus_token_pred_idx, t_s + 1])
+                loc_idx.append([plus_token_pred_idx, t_e])
+                loc_idx.append([plus_token_pred_idx, h_s + 1])
+                loc_idx.append([plus_token_pred_idx, h_e])
+
+                # loc_idx.append([t_s+1, plus_token_pred_idx])
+                # loc_idx.append([t_e, plus_token_pred_idx])
+                # loc_idx.append([h_s+1, plus_token_pred_idx])
+                # loc_idx.append([h_e, plus_token_pred_idx])
                 if pred_idx in loc_head:
                     loc_idx.append([h_s+1, h_s+1])
                     loc_idx.append([h_e, h_e])
@@ -515,14 +570,15 @@ class UniRelDataProcessor(object):
                     loc_idx.append([t_e, t_e])
                     loc_count += 1
                 # ORG_head and ORG_tail
-                # org_idx.append([plus_token_pred_idx, h_s+1])
-                org_idx.append([h_s+1, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, h_e])
-                org_idx.append([h_e, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, t_s+1])
-                org_idx.append([t_s+1, plus_token_pred_idx])
-                # org_idx.append([plus_token_pred_idx, t_e])
-                org_idx.append([t_e, plus_token_pred_idx])
+                org_idx.append([plus_token_pred_idx, h_s + 1])
+                org_idx.append([plus_token_pred_idx, h_e])
+                org_idx.append([plus_token_pred_idx, t_s + 1])
+                org_idx.append([plus_token_pred_idx, t_e])
+
+                # org_idx.append([h_s+1, plus_token_pred_idx])
+                # org_idx.append([h_e, plus_token_pred_idx])
+                # org_idx.append([t_s+1, plus_token_pred_idx])
+                # org_idx.append([t_e, plus_token_pred_idx])
                 if pred_idx in org_head:
                     org_idx.append([h_s+1, h_s+1])
                     org_idx.append([h_e, h_e])
@@ -532,14 +588,15 @@ class UniRelDataProcessor(object):
                     org_idx.append([t_e, t_e])
                     org_count += 1
                 # PER_head and PER_tail
-                # per_idx.append([plus_token_pred_idx, h_s+1])
-                per_idx.append([h_s+1, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, h_e])
-                per_idx.append([h_e, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, t_s+1])
-                per_idx.append([t_s+1, plus_token_pred_idx])
-                # per_idx.append([plus_token_pred_idx, t_e])
-                per_idx.append([t_e, plus_token_pred_idx])
+                per_idx.append([plus_token_pred_idx, h_s + 1])
+                per_idx.append([plus_token_pred_idx, h_e])
+                per_idx.append([plus_token_pred_idx, t_s + 1])
+                per_idx.append([plus_token_pred_idx, t_e])
+
+                # per_idx.append([h_s + 1, plus_token_pred_idx])
+                # per_idx.append([h_e, plus_token_pred_idx])
+                # per_idx.append([t_s + 1, plus_token_pred_idx])
+                # per_idx.append([t_e, plus_token_pred_idx])
                 if pred_idx in per_head:
                     per_idx.append([h_s+1, h_s+1])
                     per_idx.append([h_e, h_e])
@@ -549,14 +606,15 @@ class UniRelDataProcessor(object):
                     per_idx.append([t_e, t_e])
                     per_count += 1
                 # Country_head and Country_tail
-                # country_idx.append([plus_token_pred_idx, h_s+1])
-                country_idx.append([h_s+1, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, h_e])
-                country_idx.append([h_e, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, t_s+1])
-                country_idx.append([t_s+1, plus_token_pred_idx])
-                # country_idx.append([plus_token_pred_idx, t_e])
-                country_idx.append([t_e, plus_token_pred_idx])
+                country_idx.append([plus_token_pred_idx, h_s + 1])
+                country_idx.append([plus_token_pred_idx, h_e])
+                country_idx.append([plus_token_pred_idx, t_s + 1])
+                country_idx.append([plus_token_pred_idx, t_e])
+
+                # country_idx.append([h_s+1, plus_token_pred_idx])
+                # country_idx.append([h_e, plus_token_pred_idx])
+                # country_idx.append([t_s+1, plus_token_pred_idx])
+                # country_idx.append([t_e, plus_token_pred_idx])
                 if pred_idx in country_head:
                     country_idx.append([h_s+1, h_s+1])
                     country_idx.append([h_e, h_e])

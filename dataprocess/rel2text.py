@@ -507,3 +507,24 @@ webnlg_rel2clearrep = {
     "yearOfConstruction": "construction year",
     "youthclub": "youth club" 
 }
+
+sem_eval_rel2text = {
+    0: "cause",
+    2: "belong",
+    4: "placed",
+    6: "located",
+    8: "from",
+    10: "used",
+    12: "collection",
+    14: "topic",
+    16: "producer",
+    18:'other'
+}
+
+CoNLL04_rel2text = {
+    'Live_In': 'lived',
+    'OrgBased_In': 'location',
+    'Located_In': 'administrative',
+    'Work_For': 'work',
+    'Kill': 'kill',
+}

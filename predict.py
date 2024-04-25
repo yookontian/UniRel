@@ -248,9 +248,11 @@ class UniRel:
 
 if __name__ == "__main__":
     # model_path = "/home/tian/Projects/UniRel/model/nyt-checkpoint-final"
-    model_path = "/home/tian/Projects/UniRel/output/nyt-NER-LOC-ORG-PER-COUNTRY-t_v_data-bsz24/checkpoint-215000"
-    unirel = UniRel(model_path, dataset_name="nyt")
-    
+    # model_path = "/home/tian/Projects/UniRel/output/nyt-NER-LOC-ORG-PER-COUNTRY-t_v_data-bsz24/checkpoint-215000"
+    # unirel = UniRel(model_path, dataset_name="nyt")
+
+    model_path = "/home/tian/Projects/UniRel/output/webnlg-ner-LOC-ORG-PER-COUNTRY-t_v_data-bsz6/checkpoint-66000"
+    unirel = UniRel(model_path, dataset_name="webnlg")
     # print(unirel.predict("In perhaps the most ambitious Mekong cruise attempt, Impulse Tourism, an operator based in Chiang Mai, Thailand, is organizing an expedition starting in November in Jinghong, a small city in the Yunnan province in China."))
 
 
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     # t = "I don't think the Yunnan government or any other organization has dominion over the jungles of Xishuangbanna."
     # less sensitive to negative statements.
     # t = "But that spasm of irritation by a master intimidator was minor compared with what Bobby Fischer , the erratic former world chess champion , dished out in March at a news conference in Reykjavik , Iceland ."
-    t = 'Paris is in France.'
+    t = 'Paris is not in France.'
     print(unirel.model)
     print(unirel.predict(t))
     # print(unirel._data_process(t))
