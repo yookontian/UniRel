@@ -350,7 +350,7 @@ class UniRelDataProcessor(object):
                     loc_idx.append([h_e, h_e])
                     for idx in range(h_s+1, h_e):
                         loc_idx.append([idx, idx])
-                    loc_idx.sppend([h_s + 1, h_e])
+                    loc_idx.append([h_s + 1, h_e])
                     loc_idx.append([h_e, h_s + 1])
                 if spo['obj_ner'] == "LOC":
                     loc_idx.append([t_s+1, t_s+1])
