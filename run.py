@@ -32,7 +32,7 @@ from dataprocess.data_metric import *
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# UniRelModel = UniRelModel_ner
+UniRelModel = UniRelModel_ner
 # freeze_callback = FreezeLayerCallback()
 
 DataProcessorDict = {
@@ -295,7 +295,7 @@ if __name__ == '__main__':
 
     wandb.init(
         project="Unirel",
-        name="Unirel-sem_eval_2010_task_8-bsz6",
+        name="Unirel-Train_Valid_data-span_interaction_NER_matrix-WEBNLG--bsz6",
     )
 
     # save your trained model checkpoint to wandb

@@ -13,7 +13,7 @@ python3 run.py \
     --evaluation_strategy steps \
     --warmup_ratio 0.1 \
     --model_dir ./bert-base-cased/ \
-    --output_dir ./output/webnlg-ner-LOC-ORG-PER-COUNTRY-t_v_data-bsz6-try2 \
+    --output_dir ./output/webnlg-ner-LOC-ORG-PER-COUNTRY-t_v_data-New_ner_matrix-bsz6- \
     --overwrite_output_dir \
     --dataset_dir ./dataset/ \
     --dataloader_pin_memory \
