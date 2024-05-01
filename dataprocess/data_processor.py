@@ -376,8 +376,8 @@ class UniRelDataProcessor(object):
                     # loc_idx.append([t_s+1, plus_token_pred_idx])
                     # loc_idx.append([t_e, plus_token_pred_idx])
                     loc_count += 1
-                # ORG_head and ORG_tail
 
+                # ORG_head and ORG_tail
                 # org_idx.append([h_s+1, plus_token_pred_idx])
                 # org_idx.append([h_e, plus_token_pred_idx])
                 # org_idx.append([plus_token_pred_idx, t_s + 1])
@@ -631,7 +631,7 @@ class UniRelDataProcessor(object):
                 # loc_idx.append([h_e, plus_token_pred_idx])
                 # loc_idx.append([plus_token_pred_idx, t_s + 1])
                 # loc_idx.append([plus_token_pred_idx, t_e])
-                if spo['subj_ner'] == "LOC":
+                if pred_idx in loc_head:
                     loc_idx.append([h_s + 1, h_s + 1])
                     loc_idx.append([h_e, h_e])
                     for idx in range(h_s + 1, h_e):
@@ -640,10 +640,10 @@ class UniRelDataProcessor(object):
                     loc_idx.append([h_e, h_s + 1])
                     # loc_idx.append([plus_token_pred_idx, h_s + 1])
                     # loc_idx.append([plus_token_pred_idx, h_e])
-                    loc_idx.append([h_s + 1, plus_token_pred_idx])
+                    loc_idx.append([h_s+1, plus_token_pred_idx])
                     loc_idx.append([h_e, plus_token_pred_idx])
                     loc_count += 1
-                if spo['obj_ner'] == "LOC":
+                if pred_idx in loc_tail:
                     loc_idx.append([t_s + 1, t_s + 1])
                     loc_idx.append([t_e, t_e])
                     for idx in range(t_s + 1, t_e):
@@ -655,13 +655,13 @@ class UniRelDataProcessor(object):
                     # loc_idx.append([t_s+1, plus_token_pred_idx])
                     # loc_idx.append([t_e, plus_token_pred_idx])
                     loc_count += 1
-                # ORG_head and ORG_tail
 
+                # ORG_head and ORG_tail
                 # org_idx.append([h_s+1, plus_token_pred_idx])
                 # org_idx.append([h_e, plus_token_pred_idx])
                 # org_idx.append([plus_token_pred_idx, t_s + 1])
                 # org_idx.append([plus_token_pred_idx, t_e])
-                if spo['subj_ner'] == "ORG":
+                if pred_idx in org_head:
                     org_idx.append([h_s + 1, h_s + 1])
                     org_idx.append([h_e, h_e])
                     for idx in range(h_s + 1, h_e):
@@ -670,10 +670,10 @@ class UniRelDataProcessor(object):
                     org_idx.append([h_e, h_s + 1])
                     # org_idx.append([plus_token_pred_idx, h_s+1])
                     # org_idx.append([plus_token_pred_idx, h_e])
-                    org_idx.append([h_s + 1, plus_token_pred_idx])
+                    org_idx.append([h_s+1, plus_token_pred_idx])
                     org_idx.append([h_e, plus_token_pred_idx])
                     org_count += 1
-                if spo['obj_ner'] == "ORG":
+                if pred_idx in org_tail:
                     org_idx.append([t_s + 1, t_s + 1])
                     org_idx.append([t_e, t_e])
                     for idx in range(t_s + 1, t_e):
@@ -691,7 +691,7 @@ class UniRelDataProcessor(object):
                 # per_idx.append([h_e, plus_token_pred_idx])
                 # per_idx.append([plus_token_pred_idx, t_s + 1])
                 # per_idx.append([plus_token_pred_idx, t_e])
-                if spo['subj_ner'] == "PER":
+                if pred_idx in per_head:
                     per_idx.append([h_s + 1, h_s + 1])
                     per_idx.append([h_e, h_e])
                     for idx in range(h_s + 1, h_e):
@@ -703,7 +703,7 @@ class UniRelDataProcessor(object):
                     per_idx.append([h_s + 1, plus_token_pred_idx])
                     per_idx.append([h_e, plus_token_pred_idx])
                     per_count += 1
-                if spo['obj_ner'] == "PER":
+                if pred_idx in per_tail:
                     per_idx.append([t_s + 1, t_s + 1])
                     per_idx.append([t_e, t_e])
                     for idx in range(t_s + 1, t_e):
@@ -716,12 +716,13 @@ class UniRelDataProcessor(object):
                     # per_idx.append([t_e, plus_token_pred_idx])
                     per_count += 1
 
+
                 # Country_head and Country_tail
                 # country_idx.append([h_s+1, plus_token_pred_idx])
                 # country_idx.append([h_e, plus_token_pred_idx])
                 # country_idx.append([plus_token_pred_idx, t_s + 1])
                 # country_idx.append([plus_token_pred_idx, t_e])
-                if spo['subj_ner'] == "COUNTRY":
+                if pred_idx in country_head:
                     country_idx.append([h_s + 1, h_s + 1])
                     country_idx.append([h_e, h_e])
                     for idx in range(h_s + 1, h_e):
@@ -730,10 +731,10 @@ class UniRelDataProcessor(object):
                     country_idx.append([h_e, h_s + 1])
                     # country_idx.append([plus_token_pred_idx, h_s + 1])
                     # country_idx.append([plus_token_pred_idx, h_e])
-                    country_idx.append([h_s + 1, plus_token_pred_idx])
+                    country_idx.append([h_s+1, plus_token_pred_idx])
                     country_idx.append([h_e, plus_token_pred_idx])
                     country_count += 1
-                if spo['obj_ner'] == "COUNTRY":
+                if pred_idx in country_tail:
                     country_idx.append([t_s + 1, t_s + 1])
                     country_idx.append([t_e, t_e])
                     for idx in range(t_s + 1, t_e):
