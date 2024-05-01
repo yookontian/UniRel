@@ -12,6 +12,7 @@ import dataprocess.rel2text
 
 from transformers import BertTokenizerFast
 
+
 # tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased")
 
 def save_dict(dict, name):
@@ -20,14 +21,17 @@ def save_dict(dict, name):
     with open(f'{name}.txt', 'w', encoding='utf-8') as f:
         f.write(str(dict))  # dict to str
 
+
 def remove_stress_mark(text):
     text = "".join([c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn"])
     return text
- 
+
+
 def change_case(str):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', str)
     s2 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1)
-    return re.sub(r'[^\w\s]','',s2)
+    return re.sub(r'[^\w\s]', '', s2)
+
 
 # Driver code
 class UniRelDataProcessor(object):
@@ -55,21 +59,21 @@ class UniRelDataProcessor(object):
         self._get_labels()
         if dataset_name == "nyt":
             # self.pred2text: {relation: one-word-representation}
-            self.pred2text=dataprocess.rel2text.nyt_rel2text
+            self.pred2text = dataprocess.rel2text.nyt_rel2text
             # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
         elif dataset_name == "nyt_star":
-            self.pred2text=dataprocess.rel2text.nyt_rel2text
+            self.pred2text = dataprocess.rel2text.nyt_rel2text
             # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
         elif dataset_name == "webnlg":
             # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
-            self.pred2text=dataprocess.rel2text.webnlg_rel2text
+            self.pred2text = dataprocess.rel2text.webnlg_rel2text
             cnt = 1
-            exist_value=[]
+            exist_value = []
             # Some hard to convert relation directly use [unused]
             for k in self.pred2text:
                 v = self.pred2text[k]
                 if isinstance(v, int):
-                    self.pred2text[k] = f"[unused{cnt}]" 
+                    self.pred2text[k] = f"[unused{cnt}]"
                     cnt += 1
                     continue
                 ids = self.tokenizer(v)
@@ -81,9 +85,9 @@ class UniRelDataProcessor(object):
                     exist_value.append(v)
         elif dataset_name == "sem_eval_2010_task_8":
             # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
-            self.pred2text=dataprocess.rel2text.sem_eval_rel2text
+            self.pred2text = dataprocess.rel2text.sem_eval_rel2text
             cnt = 1
-            exist_value=[]
+            exist_value = []
             # Some hard to convert relation directly use [unused]
             for k in self.pred2text:
                 v = self.pred2text[k]
@@ -100,9 +104,9 @@ class UniRelDataProcessor(object):
                     exist_value.append(v)
         elif dataset_name == "CoNLL04":
             # self.pred2text = {key: "[unused"+str(i+1)+"]" for i, key in enumerate(self.label2id.keys())}
-            self.pred2text=dataprocess.rel2text.CoNLL04_rel2text
+            self.pred2text = dataprocess.rel2text.CoNLL04_rel2text
             cnt = 1
-            exist_value=[]
+            exist_value = []
             # Some hard to convert relation directly use [unused]
             for k in self.pred2text:
                 v = self.pred2text[k]
@@ -118,18 +122,18 @@ class UniRelDataProcessor(object):
                 else:
                     exist_value.append(v)
         elif dataset_name == "webnlg_star":
-            self.pred2text={}
+            self.pred2text = {}
             for pred in self.label2id.keys():
                 try:
                     self.pred2text[pred] = dataprocess.rel2text.webnlg_rel2text[pred]
                 except KeyError:
                     print(pred)
             cnt = 1
-            exist_value=[]
+            exist_value = []
             for k in self.pred2text:
                 v = self.pred2text[k]
                 if isinstance(v, int):
-                    self.pred2text[k] = f"[unused{cnt}]" 
+                    self.pred2text[k] = f"[unused{cnt}]"
                     cnt += 1
                     continue
                 ids = self.tokenizer(v)
@@ -167,9 +171,9 @@ class UniRelDataProcessor(object):
             if self.dataset_name == "CoNLL04":
                 print("CoNLL04 dataset")
             return self._pre_process_webnlg(self.train_path,
-                                     token_len=token_len,
-                                     is_predict=False,
-                                     data_nums=data_nums)
+                                            token_len=token_len,
+                                            is_predict=False,
+                                            data_nums=data_nums)
 
     def get_dev_sample(self, token_len=150, data_nums=-1):
         if self.dataset_name == "nyt":
@@ -184,9 +188,9 @@ class UniRelDataProcessor(object):
             if self.dataset_name == "CoNLL04":
                 print("CoNLL04 dataset")
             return self._pre_process_webnlg(self.dev_path,
-                                     token_len=token_len,
-                                     is_predict=False,
-                                     data_nums=data_nums)
+                                            token_len=token_len,
+                                            is_predict=False,
+                                            data_nums=data_nums)
 
     def get_test_sample(self, token_len=150, data_nums=-1):
         if self.dataset_name == "nyt":
@@ -201,9 +205,9 @@ class UniRelDataProcessor(object):
             if self.dataset_name == "CoNLL04":
                 print("CoNLL04 dataset")
             samples = self._pre_process_webnlg(self.test_path,
-                                        token_len=token_len,
-                                        is_predict=True,
-                                        data_nums=data_nums)
+                                               token_len=token_len,
+                                               is_predict=True,
+                                               data_nums=data_nums)
         # json.dump(self.complex_data, self.wp, ensure_ascii=False)
         return samples
 
@@ -258,15 +262,22 @@ class UniRelDataProcessor(object):
         data_count = 0
         data = json.load(open(path))
         label_dict = {}
+        # statistic
+        num_lines = len(data)
+        loc_count = 0
+        per_count = 0
+        org_count = 0
+        country_count = 0
+
         for line in tqdm(data):
             if len(line["relation_list"]) == 0:
                 continue
             text = line["text"]
             input_ids = self.tokenizer.encode(text)
             token_encode_len = len(input_ids)
-            if token_encode_len > 100+2:
+            if token_encode_len > 100 + 2:
                 token_len_big_than_100 += 1
-            if token_encode_len > 150+2:
+            if token_encode_len > 150 + 2:
                 token_len_big_than_150 += 1
             max_token_len = max(max_token_len, token_encode_len)
             if token_encode_len > token_len + 2:
@@ -313,126 +324,148 @@ class UniRelDataProcessor(object):
                 # Entity-Entity Interaction
                 # plus 1 or not is because of the dataset's format
                 # so here the start pos plus 1, the end pos not
-                head_matrix[h_s+1][t_s+1] = 1
-                head_matrix[t_s+1][h_s+1] = 1
+                head_matrix[h_s + 1][t_s + 1] = 1
+                head_matrix[t_s + 1][h_s + 1] = 1
                 tail_matrix[h_e][t_e] = 1
                 tail_matrix[t_e][h_e] = 1
-                span_matrix[h_s+1][h_e] = 1
-                span_matrix[h_e][h_s+1] = 1
-                span_matrix[t_s+1][t_e] = 1
-                span_matrix[t_e][t_s+1] = 1
+                span_matrix[h_s + 1][h_e] = 1
+                span_matrix[h_e][h_s + 1] = 1
+                span_matrix[t_s + 1][t_e] = 1
+                span_matrix[t_e][t_s + 1] = 1
                 # Subject-Relation Interaction
-                head_matrix[h_s+1][plus_token_pred_idx] = 1
+                head_matrix[h_s + 1][plus_token_pred_idx] = 1
                 tail_matrix[h_e][plus_token_pred_idx] = 1
-                span_matrix[h_s+1][plus_token_pred_idx] = 1
+                span_matrix[h_s + 1][plus_token_pred_idx] = 1
                 span_matrix[h_e][plus_token_pred_idx] = 1
-                span_matrix[t_s+1][plus_token_pred_idx] = 1
-                span_matrix[t_e][plus_token_pred_idx] = 1
+                # span_matrix[t_s+1][plus_token_pred_idx] = 1
+                # span_matrix[t_e][plus_token_pred_idx] = 1
                 # Relation-Object Interaction
-                head_matrix[plus_token_pred_idx][t_s+1] = 1
+                head_matrix[plus_token_pred_idx][t_s + 1] = 1
                 tail_matrix[plus_token_pred_idx][t_e] = 1
-                span_matrix[plus_token_pred_idx][t_s+1] = 1
+                span_matrix[plus_token_pred_idx][t_s + 1] = 1
                 span_matrix[plus_token_pred_idx][t_e] = 1
-                span_matrix[plus_token_pred_idx][h_s+1] = 1
-                span_matrix[plus_token_pred_idx][h_e] = 1
-                # LOC_head and LOC_tail
-                loc_idx.append([plus_token_pred_idx, t_s+1])
-                loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([plus_token_pred_idx, h_s + 1])
-                loc_idx.append([plus_token_pred_idx, h_e])
+                # span_matrix[plus_token_pred_idx][h_s+1] = 1
+                # span_matrix[plus_token_pred_idx][h_e] = 1
 
-                # loc_idx.append([t_s+1, plus_token_pred_idx])
-                # loc_idx.append([t_e, plus_token_pred_idx])
+                # LOC_head and LOC_tail
                 # loc_idx.append([h_s+1, plus_token_pred_idx])
                 # loc_idx.append([h_e, plus_token_pred_idx])
+                # loc_idx.append([plus_token_pred_idx, t_s + 1])
+                # loc_idx.append([plus_token_pred_idx, t_e])
                 if spo['subj_ner'] == "LOC":
-                    loc_idx.append([h_s+1, h_s+1])
+                    loc_idx.append([h_s + 1, h_s + 1])
                     loc_idx.append([h_e, h_e])
-                    for idx in range(h_s+1, h_e):
+                    for idx in range(h_s + 1, h_e):
                         loc_idx.append([idx, idx])
                     loc_idx.append([h_s + 1, h_e])
                     loc_idx.append([h_e, h_s + 1])
+                    # loc_idx.append([plus_token_pred_idx, h_s + 1])
+                    # loc_idx.append([plus_token_pred_idx, h_e])
+                    loc_idx.append([h_s+1, plus_token_pred_idx])
+                    loc_idx.append([h_e, plus_token_pred_idx])
+                    loc_count += 1
                 if spo['obj_ner'] == "LOC":
-                    loc_idx.append([t_s+1, t_s+1])
+                    loc_idx.append([t_s + 1, t_s + 1])
                     loc_idx.append([t_e, t_e])
-                    for idx in range(t_s+1, t_e):
+                    for idx in range(t_s + 1, t_e):
                         loc_idx.append([idx, idx])
                     loc_idx.append([t_s + 1, t_e])
                     loc_idx.append([t_e, t_s + 1])
+                    loc_idx.append([plus_token_pred_idx, t_s + 1])
+                    loc_idx.append([plus_token_pred_idx, t_e])
+                    # loc_idx.append([t_s+1, plus_token_pred_idx])
+                    # loc_idx.append([t_e, plus_token_pred_idx])
+                    loc_count += 1
                 # ORG_head and ORG_tail
-                org_idx.append([plus_token_pred_idx, h_s+1])
-                org_idx.append([plus_token_pred_idx, h_e])
-                org_idx.append([plus_token_pred_idx, t_s + 1])
-                org_idx.append([plus_token_pred_idx, t_e])
 
                 # org_idx.append([h_s+1, plus_token_pred_idx])
                 # org_idx.append([h_e, plus_token_pred_idx])
-                # org_idx.append([t_s+1, plus_token_pred_idx])
-                # org_idx.append([t_e, plus_token_pred_idx])
+                # org_idx.append([plus_token_pred_idx, t_s + 1])
+                # org_idx.append([plus_token_pred_idx, t_e])
                 if spo['subj_ner'] == "ORG":
-                    org_idx.append([h_s+1, h_s+1])
+                    org_idx.append([h_s + 1, h_s + 1])
                     org_idx.append([h_e, h_e])
-                    for idx in range(h_s+1, h_e):
+                    for idx in range(h_s + 1, h_e):
                         org_idx.append([idx, idx])
                     org_idx.append([h_s + 1, h_e])
                     org_idx.append([h_e, h_s + 1])
-
+                    # org_idx.append([plus_token_pred_idx, h_s+1])
+                    # org_idx.append([plus_token_pred_idx, h_e])
+                    org_idx.append([h_s+1, plus_token_pred_idx])
+                    org_idx.append([h_e, plus_token_pred_idx])
+                    org_count += 1
                 if spo['obj_ner'] == "ORG":
-                    org_idx.append([t_s+1, t_s+1])
+                    org_idx.append([t_s + 1, t_s + 1])
                     org_idx.append([t_e, t_e])
-                    for idx in range(t_s+1, t_e):
+                    for idx in range(t_s + 1, t_e):
                         org_idx.append([idx, idx])
                     org_idx.append([t_s + 1, t_e])
                     org_idx.append([t_e, t_s + 1])
-                # PER_head and PER_tail
-                per_idx.append([plus_token_pred_idx, h_s + 1])
-                per_idx.append([plus_token_pred_idx, h_e])
-                per_idx.append([plus_token_pred_idx, t_s + 1])
-                per_idx.append([plus_token_pred_idx, t_e])
+                    org_idx.append([plus_token_pred_idx, t_s + 1])
+                    org_idx.append([plus_token_pred_idx, t_e])
+                    # org_idx.append([t_s+1, plus_token_pred_idx])
+                    # org_idx.append([t_e, plus_token_pred_idx])
+                    org_count += 1
 
+                # PER_head and PER_tail
                 # per_idx.append([h_s + 1, plus_token_pred_idx])
                 # per_idx.append([h_e, plus_token_pred_idx])
-                # per_idx.append([t_s + 1, plus_token_pred_idx])
-                # per_idx.append([t_e, plus_token_pred_idx])
+                # per_idx.append([plus_token_pred_idx, t_s + 1])
+                # per_idx.append([plus_token_pred_idx, t_e])
                 if spo['subj_ner'] == "PER":
-                    per_idx.append([h_s+1, h_s+1])
+                    per_idx.append([h_s + 1, h_s + 1])
                     per_idx.append([h_e, h_e])
-                    for idx in range(h_s+1, h_e):
+                    for idx in range(h_s + 1, h_e):
                         per_idx.append([idx, idx])
                     per_idx.append([h_s + 1, h_e])
                     per_idx.append([h_e, h_s + 1])
+                    # per_idx.append([plus_token_pred_idx, h_s + 1])
+                    # per_idx.append([plus_token_pred_idx, h_e])
+                    per_idx.append([h_s + 1, plus_token_pred_idx])
+                    per_idx.append([h_e, plus_token_pred_idx])
+                    per_count += 1
                 if spo['obj_ner'] == "PER":
-                    per_idx.append([t_s+1, t_s+1])
+                    per_idx.append([t_s + 1, t_s + 1])
                     per_idx.append([t_e, t_e])
-                    for idx in range(t_s+1, t_e):
+                    for idx in range(t_s + 1, t_e):
                         per_idx.append([idx, idx])
                     per_idx.append([t_s + 1, t_e])
                     per_idx.append([t_e, t_s + 1])
-                # Country_head and Country_tail
-                country_idx.append([plus_token_pred_idx, h_s+1])
-                country_idx.append([plus_token_pred_idx, h_e])
-                country_idx.append([plus_token_pred_idx, t_s + 1])
-                country_idx.append([plus_token_pred_idx, t_e])
+                    per_idx.append([plus_token_pred_idx, t_s + 1])
+                    per_idx.append([plus_token_pred_idx, t_e])
+                    # per_idx.append([t_s + 1, plus_token_pred_idx])
+                    # per_idx.append([t_e, plus_token_pred_idx])
+                    per_count += 1
 
+                # Country_head and Country_tail
                 # country_idx.append([h_s+1, plus_token_pred_idx])
                 # country_idx.append([h_e, plus_token_pred_idx])
-                # country_idx.append([t_s+1, plus_token_pred_idx])
-                # country_idx.append([t_e, plus_token_pred_idx])
+                # country_idx.append([plus_token_pred_idx, t_s + 1])
+                # country_idx.append([plus_token_pred_idx, t_e])
                 if spo['subj_ner'] == "COUNTRY":
-                    country_idx.append([h_s+1, h_s+1])
+                    country_idx.append([h_s + 1, h_s + 1])
                     country_idx.append([h_e, h_e])
-                    for idx in range(h_s+1, h_e):
+                    for idx in range(h_s + 1, h_e):
                         country_idx.append([idx, idx])
                     country_idx.append([h_s + 1, h_e])
                     country_idx.append([h_e, h_s + 1])
+                    # country_idx.append([plus_token_pred_idx, h_s + 1])
+                    # country_idx.append([plus_token_pred_idx, h_e])
+                    country_idx.append([h_s+1, plus_token_pred_idx])
+                    country_idx.append([h_e, plus_token_pred_idx])
+                    country_count += 1
                 if spo['obj_ner'] == "COUNTRY":
-                    country_idx.append([t_s+1, t_s+1])
+                    country_idx.append([t_s + 1, t_s + 1])
                     country_idx.append([t_e, t_e])
-                    for idx in range(t_s+1, t_e):
+                    for idx in range(t_s + 1, t_e):
                         country_idx.append([idx, idx])
                     country_idx.append([t_s + 1, t_e])
                     country_idx.append([t_e, t_s + 1])
-
+                    country_idx.append([plus_token_pred_idx, t_s + 1])
+                    country_idx.append([plus_token_pred_idx, t_e])
+                    # country_idx.append([t_s+1, plus_token_pred_idx])
+                    # country_idx.append([t_e, plus_token_pred_idx])
+                    country_count += 1
 
                 spo_tail_set.add((h_e, plus_token_pred_idx, t_e))
                 spo_tail_text_set.add((
@@ -441,9 +474,9 @@ class UniRelDataProcessor(object):
                     self.tokenizer.decode(input_ids[t_e])
                 ))
                 spo_text_set.add((
-                    self.tokenizer.decode(input_ids[h_s+1:h_e+1]),
+                    self.tokenizer.decode(input_ids[h_s + 1:h_e + 1]),
                     pred,
-                    self.tokenizer.decode(input_ids[t_s+1:t_e+1])
+                    self.tokenizer.decode(input_ids[t_s + 1:t_e + 1])
                 ))
                 e2e_set.add((h_e, t_e))
                 e2e_set.add((t_e, h_e))
@@ -465,7 +498,15 @@ class UniRelDataProcessor(object):
             if data_count >= max_data_nums:
                 break
 
+        # print the statistics
         print(max_token_len)
+        print(f"Total samples: {num_lines}")
+        print(f"LOC count: {loc_count}")
+        print(f"PER count: {per_count}")
+        print(f"ORG count: {org_count}")
+        print(f"COUNTRY count: {country_count}")
+
+        print(f"max token: {max_token_len}")
         print(f"more than 100: {token_len_big_than_100}")
         print(f"more than 150: {token_len_big_than_150}")
         return outputs
@@ -504,9 +545,9 @@ class UniRelDataProcessor(object):
             text = line["text"]
             input_ids = self.tokenizer.encode(text)
             token_encode_len = len(input_ids)
-            if token_encode_len > 100+2:
+            if token_encode_len > 100 + 2:
                 token_len_big_than_100 += 1
-            if token_encode_len > 150+2:
+            if token_encode_len > 150 + 2:
                 token_len_big_than_150 += 1
             max_token_len = max(max_token_len, token_encode_len)
             if token_encode_len > token_len + 2:
@@ -562,101 +603,148 @@ class UniRelDataProcessor(object):
                 # Entity-Entity Interaction
                 # plus 1 or not is because of the dataset's format
                 # so here the start pos plus 1, the end pos not
-                head_matrix[h_s+1][t_s+1] = 1
-                head_matrix[t_s+1][h_s+1] = 1
+                head_matrix[h_s + 1][t_s + 1] = 1
+                head_matrix[t_s + 1][h_s + 1] = 1
                 tail_matrix[h_e][t_e] = 1
                 tail_matrix[t_e][h_e] = 1
-                span_matrix[h_s+1][h_e] = 1
-                span_matrix[h_e][h_s+1] = 1
-                span_matrix[t_s+1][t_e] = 1
-                span_matrix[t_e][t_s+1] = 1
+                span_matrix[h_s + 1][h_e] = 1
+                span_matrix[h_e][h_s + 1] = 1
+                span_matrix[t_s + 1][t_e] = 1
+                span_matrix[t_e][t_s + 1] = 1
                 # Subject-Relation Interaction
-                head_matrix[h_s+1][plus_token_pred_idx] = 1
+                head_matrix[h_s + 1][plus_token_pred_idx] = 1
                 tail_matrix[h_e][plus_token_pred_idx] = 1
-                span_matrix[h_s+1][plus_token_pred_idx] = 1
+                span_matrix[h_s + 1][plus_token_pred_idx] = 1
                 span_matrix[h_e][plus_token_pred_idx] = 1
-                span_matrix[t_s+1][plus_token_pred_idx] = 1
-                span_matrix[t_e][plus_token_pred_idx] = 1
+                # span_matrix[t_s+1][plus_token_pred_idx] = 1
+                # span_matrix[t_e][plus_token_pred_idx] = 1
                 # Relation-Object Interaction
-                head_matrix[plus_token_pred_idx][t_s+1] = 1
+                head_matrix[plus_token_pred_idx][t_s + 1] = 1
                 tail_matrix[plus_token_pred_idx][t_e] = 1
-                span_matrix[plus_token_pred_idx][t_s+1] = 1
+                span_matrix[plus_token_pred_idx][t_s + 1] = 1
                 span_matrix[plus_token_pred_idx][t_e] = 1
-                span_matrix[plus_token_pred_idx][h_s+1] = 1
-                span_matrix[plus_token_pred_idx][h_e] = 1
-                # LOC_head and LOC_tail
-                loc_idx.append([plus_token_pred_idx, t_s + 1])
-                loc_idx.append([plus_token_pred_idx, t_e])
-                loc_idx.append([plus_token_pred_idx, h_s + 1])
-                loc_idx.append([plus_token_pred_idx, h_e])
+                # span_matrix[plus_token_pred_idx][h_s+1] = 1
+                # span_matrix[plus_token_pred_idx][h_e] = 1
 
-                # loc_idx.append([t_s+1, plus_token_pred_idx])
-                # loc_idx.append([t_e, plus_token_pred_idx])
+                # LOC_head and LOC_tail
                 # loc_idx.append([h_s+1, plus_token_pred_idx])
                 # loc_idx.append([h_e, plus_token_pred_idx])
-                if pred_idx in loc_head:
-                    loc_idx.append([h_s+1, h_s+1])
+                # loc_idx.append([plus_token_pred_idx, t_s + 1])
+                # loc_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "LOC":
+                    loc_idx.append([h_s + 1, h_s + 1])
                     loc_idx.append([h_e, h_e])
+                    for idx in range(h_s + 1, h_e):
+                        loc_idx.append([idx, idx])
+                    loc_idx.append([h_s + 1, h_e])
+                    loc_idx.append([h_e, h_s + 1])
+                    # loc_idx.append([plus_token_pred_idx, h_s + 1])
+                    # loc_idx.append([plus_token_pred_idx, h_e])
+                    loc_idx.append([h_s + 1, plus_token_pred_idx])
+                    loc_idx.append([h_e, plus_token_pred_idx])
                     loc_count += 1
-                if pred_idx in loc_tail:
-                    loc_idx.append([t_s+1, t_s+1])
+                if spo['obj_ner'] == "LOC":
+                    loc_idx.append([t_s + 1, t_s + 1])
                     loc_idx.append([t_e, t_e])
+                    for idx in range(t_s + 1, t_e):
+                        loc_idx.append([idx, idx])
+                    loc_idx.append([t_s + 1, t_e])
+                    loc_idx.append([t_e, t_s + 1])
+                    loc_idx.append([plus_token_pred_idx, t_s + 1])
+                    loc_idx.append([plus_token_pred_idx, t_e])
+                    # loc_idx.append([t_s+1, plus_token_pred_idx])
+                    # loc_idx.append([t_e, plus_token_pred_idx])
                     loc_count += 1
                 # ORG_head and ORG_tail
-                org_idx.append([plus_token_pred_idx, h_s + 1])
-                org_idx.append([plus_token_pred_idx, h_e])
-                org_idx.append([plus_token_pred_idx, t_s + 1])
-                org_idx.append([plus_token_pred_idx, t_e])
 
                 # org_idx.append([h_s+1, plus_token_pred_idx])
                 # org_idx.append([h_e, plus_token_pred_idx])
-                # org_idx.append([t_s+1, plus_token_pred_idx])
-                # org_idx.append([t_e, plus_token_pred_idx])
-                if pred_idx in org_head:
-                    org_idx.append([h_s+1, h_s+1])
+                # org_idx.append([plus_token_pred_idx, t_s + 1])
+                # org_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "ORG":
+                    org_idx.append([h_s + 1, h_s + 1])
                     org_idx.append([h_e, h_e])
+                    for idx in range(h_s + 1, h_e):
+                        org_idx.append([idx, idx])
+                    org_idx.append([h_s + 1, h_e])
+                    org_idx.append([h_e, h_s + 1])
+                    # org_idx.append([plus_token_pred_idx, h_s+1])
+                    # org_idx.append([plus_token_pred_idx, h_e])
+                    org_idx.append([h_s + 1, plus_token_pred_idx])
+                    org_idx.append([h_e, plus_token_pred_idx])
                     org_count += 1
-                if pred_idx in org_tail:
-                    org_idx.append([t_s+1, t_s+1])
+                if spo['obj_ner'] == "ORG":
+                    org_idx.append([t_s + 1, t_s + 1])
                     org_idx.append([t_e, t_e])
+                    for idx in range(t_s + 1, t_e):
+                        org_idx.append([idx, idx])
+                    org_idx.append([t_s + 1, t_e])
+                    org_idx.append([t_e, t_s + 1])
+                    org_idx.append([plus_token_pred_idx, t_s + 1])
+                    org_idx.append([plus_token_pred_idx, t_e])
+                    # org_idx.append([t_s+1, plus_token_pred_idx])
+                    # org_idx.append([t_e, plus_token_pred_idx])
                     org_count += 1
-                # PER_head and PER_tail
-                per_idx.append([plus_token_pred_idx, h_s + 1])
-                per_idx.append([plus_token_pred_idx, h_e])
-                per_idx.append([plus_token_pred_idx, t_s + 1])
-                per_idx.append([plus_token_pred_idx, t_e])
 
+                # PER_head and PER_tail
                 # per_idx.append([h_s + 1, plus_token_pred_idx])
                 # per_idx.append([h_e, plus_token_pred_idx])
-                # per_idx.append([t_s + 1, plus_token_pred_idx])
-                # per_idx.append([t_e, plus_token_pred_idx])
-                if pred_idx in per_head:
-                    per_idx.append([h_s+1, h_s+1])
+                # per_idx.append([plus_token_pred_idx, t_s + 1])
+                # per_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "PER":
+                    per_idx.append([h_s + 1, h_s + 1])
                     per_idx.append([h_e, h_e])
+                    for idx in range(h_s + 1, h_e):
+                        per_idx.append([idx, idx])
+                    per_idx.append([h_s + 1, h_e])
+                    per_idx.append([h_e, h_s + 1])
+                    # per_idx.append([plus_token_pred_idx, h_s + 1])
+                    # per_idx.append([plus_token_pred_idx, h_e])
+                    per_idx.append([h_s + 1, plus_token_pred_idx])
+                    per_idx.append([h_e, plus_token_pred_idx])
                     per_count += 1
-                if pred_idx in per_tail:
-                    per_idx.append([t_s+1, t_s+1])
+                if spo['obj_ner'] == "PER":
+                    per_idx.append([t_s + 1, t_s + 1])
                     per_idx.append([t_e, t_e])
+                    for idx in range(t_s + 1, t_e):
+                        per_idx.append([idx, idx])
+                    per_idx.append([t_s + 1, t_e])
+                    per_idx.append([t_e, t_s + 1])
+                    per_idx.append([plus_token_pred_idx, t_s + 1])
+                    per_idx.append([plus_token_pred_idx, t_e])
+                    # per_idx.append([t_s + 1, plus_token_pred_idx])
+                    # per_idx.append([t_e, plus_token_pred_idx])
                     per_count += 1
-                # Country_head and Country_tail
-                country_idx.append([plus_token_pred_idx, h_s + 1])
-                country_idx.append([plus_token_pred_idx, h_e])
-                country_idx.append([plus_token_pred_idx, t_s + 1])
-                country_idx.append([plus_token_pred_idx, t_e])
 
+                # Country_head and Country_tail
                 # country_idx.append([h_s+1, plus_token_pred_idx])
                 # country_idx.append([h_e, plus_token_pred_idx])
-                # country_idx.append([t_s+1, plus_token_pred_idx])
-                # country_idx.append([t_e, plus_token_pred_idx])
-                if pred_idx in country_head:
-                    country_idx.append([h_s+1, h_s+1])
+                # country_idx.append([plus_token_pred_idx, t_s + 1])
+                # country_idx.append([plus_token_pred_idx, t_e])
+                if spo['subj_ner'] == "COUNTRY":
+                    country_idx.append([h_s + 1, h_s + 1])
                     country_idx.append([h_e, h_e])
+                    for idx in range(h_s + 1, h_e):
+                        country_idx.append([idx, idx])
+                    country_idx.append([h_s + 1, h_e])
+                    country_idx.append([h_e, h_s + 1])
+                    # country_idx.append([plus_token_pred_idx, h_s + 1])
+                    # country_idx.append([plus_token_pred_idx, h_e])
+                    country_idx.append([h_s + 1, plus_token_pred_idx])
+                    country_idx.append([h_e, plus_token_pred_idx])
                     country_count += 1
-                if pred_idx in country_tail:
-                    country_idx.append([t_s+1, t_s+1])
+                if spo['obj_ner'] == "COUNTRY":
+                    country_idx.append([t_s + 1, t_s + 1])
                     country_idx.append([t_e, t_e])
+                    for idx in range(t_s + 1, t_e):
+                        country_idx.append([idx, idx])
+                    country_idx.append([t_s + 1, t_e])
+                    country_idx.append([t_e, t_s + 1])
+                    country_idx.append([plus_token_pred_idx, t_s + 1])
+                    country_idx.append([plus_token_pred_idx, t_e])
+                    # country_idx.append([t_s+1, plus_token_pred_idx])
+                    # country_idx.append([t_e, plus_token_pred_idx])
                     country_count += 1
-
 
                 spo_tail_set.add((h_e, plus_token_pred_idx, t_e))
                 spo_tail_text_set.add((
@@ -665,14 +753,12 @@ class UniRelDataProcessor(object):
                     self.tokenizer.decode(input_ids[t_e])
                 ))
                 spo_text_set.add((
-                    self.tokenizer.decode(input_ids[h_s+1:h_e+1]),
+                    self.tokenizer.decode(input_ids[h_s + 1:h_e + 1]),
                     pred,
-                    self.tokenizer.decode(input_ids[t_s+1:t_e+1])
+                    self.tokenizer.decode(input_ids[t_s + 1:t_e + 1])
                 ))
                 e2e_set.add((h_e, t_e))
                 e2e_set.add((t_e, h_e))
-
-
 
             outputs["text"].append(text)
             # spo_list: {(sub, pred(original format), obj), (), ...}
@@ -693,10 +779,10 @@ class UniRelDataProcessor(object):
 
         # print the statistics
         print(f"Total samples: {num_lines}")
-        print(f"LOC count: {loc_count/2}")
-        print(f"PER count: {per_count/2}")
-        print(f"ORG count: {org_count/2}")
-        print(f"COUNTRY count: {country_count/2}")
+        print(f"LOC count: {loc_count}")
+        print(f"PER count: {per_count}")
+        print(f"ORG count: {org_count}")
+        print(f"COUNTRY count: {country_count}")
 
         print(f"max token: {max_token_len}")
         print(f"more than 100: {token_len_big_than_100}")
