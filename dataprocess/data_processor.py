@@ -164,6 +164,10 @@ class UniRelDataProcessor(object):
                                      token_len=token_len,
                                      is_predict=False,
                                      data_nums=data_nums)
+            # return self._pre_process_webnlg(self.train_path,
+            #                          token_len=token_len,
+            #                          is_predict=False,
+            #                          data_nums=data_nums)
         elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the train data")
             if self.dataset_name == "sem_eval_2010_task_8":
@@ -181,6 +185,10 @@ class UniRelDataProcessor(object):
                                      token_len=token_len,
                                      is_predict=True,
                                      data_nums=data_nums)
+            # return self._pre_process_webnlg(self.dev_path,
+            #                          token_len=token_len,
+            #                          is_predict=True,
+            #                          data_nums=data_nums)
         elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the dev data")
             if self.dataset_name == "sem_eval_2010_task_8":
@@ -189,7 +197,7 @@ class UniRelDataProcessor(object):
                 print("CoNLL04 dataset")
             return self._pre_process_webnlg(self.dev_path,
                                             token_len=token_len,
-                                            is_predict=False,
+                                            is_predict=True,
                                             data_nums=data_nums)
 
     def get_test_sample(self, token_len=150, data_nums=-1):
@@ -198,6 +206,10 @@ class UniRelDataProcessor(object):
                                         token_len=token_len,
                                         is_predict=True,
                                         data_nums=data_nums)
+            # samples = self._pre_process_webnlg(self.test_path,
+            #                             token_len=token_len,
+            #                             is_predict=True,
+            #                             data_nums=data_nums)
         elif self.dataset_name == "webnlg" or self.dataset_name == "sem_eval_2010_task_8" or self.dataset_name == "CoNLL04":
             print("using webnlg to preprocessing the test data")
             if self.dataset_name == "sem_eval_2010_task_8":

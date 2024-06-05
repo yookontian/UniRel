@@ -26,6 +26,7 @@ class UniRel:
         self._get_pred_str(dataset_name)
 
 
+
         
     
     def _get_pred_str(self, dataset_name):
@@ -251,8 +252,8 @@ if __name__ == "__main__":
     # model_path = "/home/tian/Projects/UniRel/output/nyt-NER-LOC-ORG-PER-COUNTRY-t_v_data-bsz24/checkpoint-215000"
     # unirel = UniRel(model_path, dataset_name="nyt")
 
-    model_path = "/home/tian/Projects/UniRel/output/webnlg-ner-LOC-ORG-PER-COUNTRY-t_v_data-bsz6/checkpoint-66000"
-    unirel = UniRel(model_path, dataset_name="webnlg")
+    model_path = "/home/tian/Projects/UniRel/output/nyt-ner-LOC-ORG-PER-COUNTRY-t_v_data-ner_span_matrix_exp_12-bsz24/checkpoint-185000"
+    unirel = UniRel(model_path, dataset_name="nyt")
     # print(unirel.predict("In perhaps the most ambitious Mekong cruise attempt, Impulse Tourism, an operator based in Chiang Mai, Thailand, is organizing an expedition starting in November in Jinghong, a small city in the Yunnan province in China."))
 
 
@@ -262,8 +263,8 @@ if __name__ == "__main__":
     # t = "I don't think the Yunnan government or any other organization has dominion over the jungles of Xishuangbanna."
     # less sensitive to negative statements.
     # t = "But that spasm of irritation by a master intimidator was minor compared with what Bobby Fischer , the erratic former world chess champion , dished out in March at a news conference in Reykjavik , Iceland ."
-    t = 'Paris is not in France.'
-    print(unirel.model)
+    t = 'Paris France.'
+    # print(unirel.model)
     print(unirel.predict(t))
     # print(unirel._data_process(t))
     # print(unirel.predict([
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     # ]))
     # print(unirel.predict("These are tough changes , and some of them will be quite controversial among our colleagues here , '' Senator Joseph I. Lieberman , Democrat of Connecticut , said Thursday as he endorsed a plan developed by Senator John McCain , Republican of Arizona , after his hearings into Mr. Abramoff 's bilking of Indian tribes through a lobbying operation ."))
 
-    print("end")
+    print("===================end==================")
     # print the sum number of trainable parameters
     # print(sum(p.numel() for p in unirel.model.parameters() if p.requires_grad))
         

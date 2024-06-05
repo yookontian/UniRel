@@ -85,21 +85,32 @@ class UniRelModel_ner(BertPreTrainedModel):
             if self.config.test_data_type == "unirel_span":
             # 0-2: head, 3-5: tail, 6-7: span, 8: LOC, 9: ORG, 10: PER, 11: Country
                 head_logits = self.sigmoid(
-                        attentions_scores[:, :3, :, :].mean(1)
-                    )
+                    attentions_scores[:, :3, :, :].mean(1)
+                )
                 tail_logits = self.sigmoid(
-                        attentions_scores[:, 3:6, :, :].mean(1)
-                    )
+                    attentions_scores[:, 3:6, :, :].mean(1)
+                )
                 span_logits = self.sigmoid(
-                        attentions_scores[:, 6:8, :, :].mean(1)
-                    )
+                    attentions_scores[:, 6:8, :, :].mean(1)
+                )
+            #     head_logits = self.sigmoid(
+            #         attentions_scores[:, 0, :, :]
+            #     )
+            #     tail_logits = self.sigmoid(
+            #         attentions_scores[:, 1, :, :]
+            #     )
+            #     span_logits = self.sigmoid(
+            #         attentions_scores[:, 2, :, :]
+            #     )
                 # loc_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
                 loc_logits = self.sigmoid(attentions_scores[:, 8, :, :])
+                # loc_logits = self.sigmoid(attentions_scores[:, 3:5, :, :].mean(1))
                 # org_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
                 org_logits = self.sigmoid(attentions_scores[:, 9, :, :])
+                # org_logits = self.sigmoid(attentions_scores[:, 5:7, :, :].mean(1))
                 # per_logits = self.sigmoid(attentions_scores[:, 10:, :, :].mean(1))
                 per_logits = self.sigmoid(attentions_scores[:, 10, :, :])
-                # per_logits = self.sigmoid(attentions_scores[:, 8:10, :, :].mean(1))
+                # per_logits = self.sigmoid(attentions_scores[:, 7:9, :, :].mean(1))
                 country_logits = self.sigmoid(attentions_scores[:, 11, :, :])
                 # country_logits = self.sigmoid(attentions_scores[:, 10:, :, :].mean(1))
 
@@ -137,7 +148,7 @@ class UniRelModel_ner(BertPreTrainedModel):
             last_hidden_state = torch.cat((text_outputs.last_hidden_state, pred_outputs.last_hidden_state), -2)
             key_layer = self.key_linear(last_hidden_state)
             value_layer = self.value_linear(last_hidden_state)
-            tail_logits = nn.Sigmoid()(torch.matmul(key_layer, value_layer.permute(0, 2,1)))
+            tail_logits = nn.Sigmoid()(torch.matmul(key_layer, value_layer.permute(0, 2, 1)))
 
         loss = None
 

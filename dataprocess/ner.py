@@ -27,7 +27,7 @@ for ent in processed.ents:
 """
 # load the json file in dataset/webnlg/test_data.json and print the keys
 import json
-with open('/home/tian/Projects/UniRel/dataset/webnlg/train_split.json', 'r', encoding='utf-8') as f:
+with open('/home/tian/Projects/UniRel/dataset/nyt/valid_data.json', 'r', encoding='utf-8') as f:
     samples = json.load(f)
 # print(samples[0].keys())
 # print(samples[0]['text'])
@@ -77,9 +77,8 @@ for sample in tqdm.tqdm(samples):
 
 
 # save the new_list to a new json file as dataset/webnlg/test_data_ner.json
-with open('/home/tian/Projects/UniRel/dataset/webnlg/train_split_ner.json', 'w', encoding='utf-8') as f:
+with open('/home/tian/Projects/UniRel/dataset/nyt/ner/nyt/valid_data.json', 'w', encoding='utf-8') as f:
     json.dump(new_list, f, ensure_ascii=False)
-
 # --> next: valid_data, modify the dataset file name, and modify the data_processor
 
 print("done!")

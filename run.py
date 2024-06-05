@@ -223,11 +223,11 @@ if __name__ == '__main__':
                                        tokenizer=tokenizer,
                                        dataset_name=run_args.dataset_name)
 
-    train_samples = data_processor.get_train_sample(
-         token_len=run_args.max_seq_length, data_nums=run_args.train_data_nums)
+    # train_samples = data_processor.get_train_sample(
+    #      token_len=run_args.max_seq_length, data_nums=run_args.train_data_nums)
 
-    # dev_samples = data_processor.get_dev_sample(
-    #     token_len=150, data_nums=run_args.test_data_nums)
+    dev_samples = data_processor.get_dev_sample(
+        token_len=150, data_nums=run_args.test_data_nums)
 
     # For special experiment wants to test on specific testset
     if run_args.test_data_path is not None:
@@ -238,32 +238,32 @@ if __name__ == '__main__':
             token_len=150, data_nums=run_args.test_data_nums)
 
     # Train with fixed sentence length of 100
-    train_dataset = DatasetType(
-        train_samples,
-        data_processor,
-        tokenizer,
-        mode='train',
-        ignore_label=-100,
-        model_type='bert',
-        ngram_dict=None,
-        max_length=run_args.max_seq_length + 2,
-        predict=False,
-        eval_type="train",
-    )
-
-    # 150 is big enough for both NYT and WebNLG testset
-    # dev_dataset = DatasetType(
-    #     dev_samples,
+    # train_dataset = DatasetType(
+    #     train_samples,
     #     data_processor,
     #     tokenizer,
-    #     mode='dev',
+    #     mode='train',
     #     ignore_label=-100,
     #     model_type='bert',
     #     ngram_dict=None,
-    #     max_length=150 + 2,
-    #     predict=True,
-    #     eval_type="eval"
+    #     max_length=run_args.max_seq_length + 2,
+    #     predict=False,
+    #     eval_type="train",
     # )
+
+    # 150 is big enough for both NYT and WebNLG testset
+    dev_dataset = DatasetType(
+        dev_samples,
+        data_processor,
+        tokenizer,
+        mode='dev',
+        ignore_label=-100,
+        model_type='bert',
+        ngram_dict=None,
+        max_length=150 + 2,
+        predict=True,
+        eval_type="eval"
+    )
     test_dataset = DatasetType(
         test_samples,
         data_processor,
@@ -292,10 +292,10 @@ if __name__ == '__main__':
 
     # set the wandb project where this run will be logged
     # start a new wandb run to track this script
-
+    """
     wandb.init(
         project="Unirel",
-        name="Unirel-Train_Valid_data-span_interaction_NER_matrix-WEBNLG--bsz6",
+        name="Unirel-ner(LOC,PER,ORG,COUNTRY)-1_1_1for_ses-exp12-NYT-bsz24",
     )
 
     # save your trained model checkpoint to wandb
@@ -341,7 +341,7 @@ if __name__ == '__main__':
                 for key, value in sorted(train_result.metrics.items()):
                     logger.info(f"  {key} = {value}")
                     print(f"{key} = {value}", file=writer)
-
+    """
     results = dict()
     if run_args.do_test_all_checkpoints:
         if run_args.checkpoint_dir is None:
@@ -353,12 +353,18 @@ if __name__ == '__main__':
         else:
             checkpoints = [run_args.checkpoint_dir]
         logger.info(f"Test the following checkpoints: {checkpoints}")
-        best_f1 = 0
-        best_p = 0
-        best_r = 0
-        best_checkpoint = None
+        best_dev_f1 = 0
+        best_test_f1 = 0
+        best_dev_checkpoint = None
+        best_test_checkpoint = None
+        best_check_idx = None
+        best_test_idx = None
         # Find best model on devset
-        for checkpoint in checkpoints:
+        test_results = {}
+        dev_results = {}
+        # release the cuda memory of trainer
+        trainer = None
+        for cp_idx, checkpoint in enumerate(checkpoints):
             # here it reload the model from the checkpoint
             logger.info(checkpoint)
             print(checkpoint)
@@ -373,7 +379,11 @@ if __name__ == '__main__':
             with torch.no_grad():
                 model = PredictModelType.from_pretrained(checkpoint, config=config)
                 model.eval()
-                trainer = Trainer(model=model,
+                trainer_dev = Trainer(model=model,
+                                  args=training_args,
+                                  eval_dataset=dev_dataset,
+                                  callbacks=[MyCallback])
+                trainer_test = Trainer(model=model,
                                   args=training_args,
                                   eval_dataset=test_dataset,
                                   callbacks=[MyCallback])
@@ -382,17 +392,43 @@ if __name__ == '__main__':
                 #     eval_dataset=dev_dataset, metric_key_prefix="test")
                 # result = {f"{k}_{global_step}": v for k, v in eval_res.items()}
                 # results.update(result)
-                test_predictions = trainer.predict(test_dataset)
-                p, r, f1 = ExtractType(tokenizer, test_dataset, test_predictions, output_dir)
-                if f1 > best_f1:
-                    best_f1 = f1
-                    best_p = p
-                    best_r = r
-                    best_checkpoint = checkpoint
+                dev_predictions = trainer_dev.predict(dev_dataset)
+                dev_p, dev_r, dev_f1 = ExtractType(tokenizer, dev_dataset, dev_predictions, output_dir)
+                dev_results[cp_idx] = [dev_p, dev_r, dev_f1]
+                if dev_f1 > best_dev_f1:
+                    best_dev_f1 = dev_f1
+                    best_dev_checkpoint = checkpoint
+                    best_check_idx = cp_idx
+
+                test_predictions = trainer_test.predict(test_dataset)
+                test_p, test_r, test_f1 = ExtractType(tokenizer, test_dataset, test_predictions, output_dir)
+                test_results[cp_idx] = [test_p, test_r, test_f1]
+                if test_f1 > best_test_f1:
+                    best_test_f1 = test_f1
+                    best_test_checkpoint = checkpoint
+                    best_test_idx = cp_idx
                 # clean the torch cache
                 torch.cuda.empty_cache()
 
         # Do test
-        logger.info(f"Best checkpoint at {best_checkpoint} \n{{'all-prec': {best_p}, 'all-recall': {best_r}, 'all-f1': {best_f1}}}")
+        logger.info(f"Based on valid dataset, the valid checkpoint at {best_dev_checkpoint}")
+        logger.info(f"The test result is {{'all-prec': {test_results[best_check_idx][0]}, 'all-recall': {test_results[best_check_idx][1]}, 'all-f1': {test_results[best_check_idx][2]}}}")
+        logger.info("--------------------")
+        logger.info(f"Based on test dataset, the best checkpoint at {best_test_checkpoint}")
+        logger.info(f"The test result is {{'all-prec': {test_results[best_test_idx][0]}, 'all-recall': {test_results[best_test_idx][1]}, 'all-f1': {test_results[best_test_idx][2]}}}")
+        # with torch.no_grad():
+        #     model = PredictModelType.from_pretrained(best_checkpoint, config=config)
+        #     model.eval()
+        #     trainer = Trainer(model=model,
+        #                       args=training_args,
+        #                       eval_dataset=test_dataset,
+        #                       callbacks=[MyCallback])
+        #
+        #     test_predictions = trainer.predict(test_dataset)
+        #     p, r, f1 = ExtractType(tokenizer, test_dataset, test_predictions, output_dir)
+        #     logger.info(f"Test result: {{'all-prec': {p}, 'all-recall': {r}, 'all-f1': {f1}}}")
+        #     # clean the torch cache
+        #     torch.cuda.empty_cache()
+
 
     print("Here I am")

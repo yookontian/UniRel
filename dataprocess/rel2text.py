@@ -522,7 +522,7 @@ sem_eval_rel2text = {
 }
 
 CoNLL04_rel2text = {
-    'Live_In': 'lived',
+    'Live_In': 'live',
     'OrgBased_In': 'location',
     'Located_In': 'administrative',
     'Work_For': 'work',

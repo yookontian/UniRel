@@ -286,7 +286,7 @@ def unirel_span_extractor(tokenizer,
         normal = True
         seo = False
         epo = False
-        soo = False
+        # soo = False
         occured_en = []
         occured_pair = []
         for spo in spo_span_list:
@@ -305,20 +305,19 @@ def unirel_span_extractor(tokenizer,
                 # EPO end
                     seo = True
 
-            else:
-                if spo[0] not in occured_en:
-                    occured_en.append(spo[0])
-                if spo[2] not in occured_en:
-                    occured_en.append(spo[2])
+            if spo[0] not in occured_en:
+                occured_en.append(spo[0])
+            if spo[2] not in occured_en:
+                occured_en.append(spo[2])
             # SOO
             # spo[0] includes spo[2]
-            if spo[0][0] <= spo[2][0] and spo[0][1] >= spo[2][1]:
-                soo = True
-                normal = False
-            # spo[2] includes spo[0]
-            if spo[2][0] <= spo[0][0] and spo[2][1] >= spo[0][1]:
-                soo = True
-                normal = False
+            # if spo[0][0] <= spo[2][0] and spo[0][1] >= spo[2][1]:
+            #     soo = True
+            #     normal = False
+            # # spo[2] includes spo[0]
+            # if spo[2][0] <= spo[0][0] and spo[2][1] >= spo[0][1]:
+            #     soo = True
+            #     normal = False
 
         
         curr_data_idx += 1
@@ -390,10 +389,10 @@ def unirel_span_extractor(tokenizer,
             state_dict_epo["p"] += len(pred_spo_text)
             state_dict_epo["g"] += len(gold_spo_text)
             state_dict_epo["c"] += len(pred_spo_text & gold_spo_text)
-        if soo:
-            state_dict_soo["p"] += len(pred_spo_text)
-            state_dict_soo["g"] += len(gold_spo_text)
-            state_dict_soo["c"] += len(pred_spo_text & gold_spo_text)
+        # if soo:
+        #     state_dict_soo["p"] += len(pred_spo_text)
+        #     state_dict_soo["g"] += len(gold_spo_text)
+        #     state_dict_soo["c"] += len(pred_spo_text & gold_spo_text)
 
         # if len(pred_spo_text & gold_spo_text) != len(gold_spo_text):
         #     print("problem")
@@ -425,7 +424,7 @@ def unirel_span_extractor(tokenizer,
     print(f"\nnormal:  {state_dict_normal} \n {calclulate_f1(state_dict_normal, 'normal')}")
     print(f"\nseo:  {state_dict_seo} \n {calclulate_f1(state_dict_seo, 'seo')}")
     print(f"\nepo:  {state_dict_epo} \n {calclulate_f1(state_dict_epo, 'epo')}")
-    print(f"\nsoo:  {state_dict_soo} \n {calclulate_f1(state_dict_soo, 'soo')}")
+    # print(f"\nsoo:  {state_dict_soo} \n {calclulate_f1(state_dict_soo, 'soo')}")
     with open(path, "w") as wp:
         json.dump(extract_data, wp, indent=2, ensure_ascii=False)
     return all_metirc_results["all-prec"], all_metirc_results["all-recall"], all_metirc_results["all-f1"]
